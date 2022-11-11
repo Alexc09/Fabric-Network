@@ -1,0 +1,337 @@
+# This is used to define the channel configuration, which is then used to build the channel
+# The channel configuration specifies which organizations are channel members, 
+# the ordering nodes that can add new blocks on the channel, and the policies that govern channel updates
+
+
+# Lists the member organizations of a channel
+# Each organization is identified by an MSP ID and a channel MSP
+# The channel MSP is stored in the channel configuration and contains the certificates that are used to identify nodes, applications & admins of an organization
+Organizations:
+    # We use the anchor element ("&"), so that we can refer to this organization from other parts of the .yaml file (refer as BankA)
+    - &BankA
+      # Name of the organization 
+      Name: BankA
+      # Name of the organization's MSP
+      ID: BankAMSP
+      # Location of the organization's cryptographic material. The configtxgen tool uses this MSP folder to create the channel MSP
+      # This MSP folder needs to contain the following information, which will be transferred to the channel MSP & stored in the channel configuration
+        # - A CA root cert that establishes the root of trust for the organization
+        # - A root cert from the TLS CA that issues TLS certificates of the peer/orderer nodes
+        # - If NodeOUs are enabled, the MSP folder must contain a config.yaml file that identifies the admins, nodes & clients
+        # - If NodeOUs are not enabled, the MSP needs to contain an admincerts folder that contains the signing certs of the organizations administrator identities
+      MSPDir: crypto-config/peerOrganizations/bank_a.trade.com/msp
+      # An anchor peer is a peer node on a channel that all other peers can discover and communicate with
+      # Defines the anchor peer for this organization
+      AnchorPeers:
+        - Host: peer0.bank_a.trade.com
+          Port: 7051
+      # There are 4 default organization policies: Readers, Writers, Admins and Endorsement, although you can name the policies however you want
+      # The application policies will later reference these organization policies
+      # There are 4 organizational units in each organization, as defined in the config.yaml file in the organization's MSP directory
+      # https://hyperledger-fabric.readthedocs.io/en/latest/msp.html#identity-classification
+      # Certificates issued by the CA with OU=client will be identified as clients. The same goes for peer and admin
+      # There are 2 types of policies
+        # Signature: Define specific types of users who must sign in order for a policy to be satisfied
+        # ImplicitMeta: Aggregate the results of policies deeper in the configuration tree that are ultimately defined by signature policies
+      # For organization policies, their canonical path is usually: /Channel/<Application|Orderer>/<OrgName>/<PolicyName>
+      Policies:
+        # Who has read access to the channel
+        Readers:
+          Type: Signature
+        # Uses AND, OR and NOutOf
+          Rule: "OR('BankAMSP.admin', 'BankAMSP.peer', 'BankAMSP.client')"
+        # Who has write access to the channel
+        Writers:
+          Type: Signature
+          Rule: "OR('BankAMSP.admin', 'BankAMSP.client')"
+        # Who has administer the channel
+        Admins:
+          Type: Signature
+          Rule: "OR('BankAMSP.admin')"
+        # Who can endorse transactions
+        Endorsement:
+          Type: Signature
+          Rule: "OR('BankAMSP.peer')"
+
+    - &BankB
+      Name: BankB
+      ID: BankBMSP
+      MSPDir: crypto-config/peerOrganizations/bank_b.trade.com/msp
+      AnchorPeers:
+        - Host: peer0.bank_b.trade.com
+          Port: 7051
+      Policies:
+        Readers:
+          Type: Signature
+          Rule: "OR('BankBMSP.admin', 'BankBMSP.peer', 'BankBMSP.client')"
+        Writers:
+          Type: Signature
+          Rule: "OR('BankBMSP.admin', 'BankBMSP.client')"
+        Admins:
+          Type: Signature
+          Rule: "OR('BankBMSP.admin')"
+        Endorsement:
+          Type: Signature
+          Rule: "OR('BankBMSP.peer')"
+
+    - &BankC
+      Name: BankC
+      ID: BankCMSP
+      MSPDir: crypto-config/peerOrganizations/bank_c.trade.com/msp
+      AnchorPeers:
+        - Host: peer0.bank_c.trade.com
+          Port: 7051
+      Policies:
+        Readers:
+          Type: Signature
+          Rule: "OR('BankCMSP.admin', 'BankCMSP.peer', 'BankCMSP.client')"
+        Writers:
+          Type: Signature
+          Rule: "OR('BankCMSP.admin', 'BankCMSP.client')"
+        Admins:
+          Type: Signature
+          Rule: "OR('BankCMSP.admin')"
+        Endorsement:
+          Type: Signature
+          Rule: "OR('BankCMSP.peer')"
+          
+    - &OrdererA
+      Name: OrdererA
+      ID: OrdererAMSP
+      MSPDir: crypto-config/ordererOrganizations/orderer_a.net/msp
+      # A list of all orderers this organization runs, which clients and peers can connect to to push transactions & receive blocks respectively
+      OrdererEndpoints:
+        - "orderer.orderer_a.net:7050"
+      Policies:
+        Readers:
+          Type: Signature
+          # member means you can use any member of the MSP (I.e admin, client, peer, orderer)
+          # https://hyperledger-fabric.readthedocs.io/en/release-2.2/endorsement-policies.html#endorsement-policy-syntax
+          Rule: "OR('OrdererAMSP.member')"
+        Writers:
+          Type: Signature
+          Rule: "OR('OrdererAMSP.member')"
+        Admins:
+          Type: Signature
+          Rule: "OR('OrdererAMSP.admin')"
+
+    - &OrdererB
+      Name: OrdererB
+      ID: OrdererBMSP
+      MSPDir: crypto-config/ordererOrganizations/orderer_b.net/msp
+      OrdererEndpoints:
+        - "orderer.orderer_b.net:7050"
+      Policies:
+        Readers:
+          Type: Signature
+          Rule: "OR('OrdererBMSP.member')"
+        Writers:
+          Type: Signature
+          Rule: "OR('OrdererBMSP.member')"
+        Admins:
+          Type: Signature
+          Rule: "OR('OrdererBMSP.admin')"
+
+
+
+
+# Define the ordering service
+Orderer: &OrdererDefaults
+  # Can be solo, kafka or raft
+  OrdererType: solo
+  # A list of orderer addresses that clients and peers can connect to
+  # Addresses: 
+  #   - orderer_a.net:7050
+  #   - orderer_b.net:7050
+  # Amount of time to wait before creating a batch
+  BatchTimeout: 2s
+  BatchSize:
+    # Max number of messages to permit in a batch. No block will contain more than this number of messages
+    MaxMessageCount: 10
+    # Absolute maximum number of bytes allowed for serialized messages in a batch
+    AbsoluteMaxBytes: 10 MB
+    # A batch will fill with messages until this size is reached. If adding a new message to the batch causes the batch to exceed
+    # preferred max bytes, the current batch is closed & written to a block, and a new batch containing the new message is created
+    # Messages may be larger than preferred max bytes, but up to AbsoluteMaxBytes
+    PreferredMaxBytes: 2 MB
+  # Maximum number of channels to allow on the ordering network. When set to 0, implies no maximum number
+  MaxChannels: 0
+
+  EtcdRaft:
+    Consenters:
+      - Host: orderer.orderer_a.net
+        Port: 7050
+        ClientTLSCert: crypto-config/ordererOrganizations/orderer_a.net/orderers/orderer.orderer_a.net/tls/server.crt
+        ServerTLSCert: crypto-config/ordererOrganizations/orderer_a.net/orderers/orderer.orderer_a.net/tls/server.crt
+      - Host: orderer.orderer_b.net
+        Port: 7050
+        ClientTLSCert: crypto-config/ordererOrganizations/orderer_b.net/orderers/orderer.orderer_b.net/tls/server.crt
+        ServerTLSCert: crypto-config/ordererOrganizations/orderer_b.net/orderers/orderer.orderer_b.net/tls/server.crt
+
+  # For orderer policies, their canonical path is /Channel/Orderer/<PolicyName>
+  Policies:
+    Readers:
+      Type: ImplicitMeta
+      # "Readers" here will reference the "Readers" signature policy defined in the ordering organizations. 
+      Rule: "ANY Readers"
+    # Indicates who has write access for block creation
+    Writers:
+      Type: ImplicitMeta
+      # Here, we indicate that every member of the orderer organizations that has write access to its organization,
+      # posesses write access for block creation
+      Rule: "ANY Writers"
+    Admins:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Admins"
+    # Specifies what signatures must be included in the block from the orderer for the peer to validate it
+    BlockValidation:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+  
+
+
+
+# Capabilities define which features must be present in a fabric binary for that binary to safely participate in the fabric network
+Capabilities:
+  # Govern tasks that are jointly administered by the peer organizations and the ordering service
+  # Sets the minimum version of Fabric that can be run by peer & ordering nodes
+  Channel: &ChannelCapabilities
+    V3_0: true
+  
+  # Govern tasks & processing exclusive to the ordering service
+  # Sets the minimum version of Fabric binaries that can be run by ordering nodes
+  Orderer: &OrdererCapabilities
+    V2_0: true
+
+  # Govern tasks and processing exclusive to the peers
+  # Sets the minimum version of Fabric binaries can be run by peer nodes
+  Application: &ApplicationCapabilities
+    V2_0: true
+
+
+
+
+# Defines the policies that govern how peer organizations can interact with application channels
+# These policies govern the number of peer orgs that need to approve a chaincode definition or sign a request to update the channel config
+# These policies are also used to restrict access to channel resources, such as the ability to write to the channel ledger or query channel events
+Application: &ApplicationDefaults
+  # Lists the organizations participating in the application side of the network
+  Organizations:
+
+  # For application policies, their canonical path is /Channel/Application/<PolicyName>
+  # We use ImplicitMeta policies to define our Application policies. These ImplicitMeta policies uses the organization defined
+  # Signature Policies for their Rule (E.g "ANY Readers" here will evaluate the "Readers" Signature policy of all peer organizations)
+  # https://hyperledger-fabric.readthedocs.io/en/latest/policies/policies.html#fabric-chaincode-lifecycle
+  Policies:
+    Readers:
+      # ImplicitMeta policies aggregate the result of policies deeper in the configuration tree that are ultimately defined by the organizations' Signature policies
+      Type: ImplicitMeta
+      # "Readers" here refers to the "Readers" signature policy defined in the peer organizations, which include the organization's client, admin and peer OUs
+      Rule: "ANY Readers"
+    Writers:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+    Admins:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Admins"
+    # Governs who needs to approve a chaincode definition
+    LifecycleEndorsement:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Endorsement"
+    # Specifies the default endorsement policy for a chaincode
+    # The chaincode endorsement policy defines which organization members need to execute & validate a tx against the chaincode, 
+    # in order for the tx to be considered valid
+    Endorsement:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Endorsement"
+  
+  # Describe the application level capabilities. Here, we reference to ApplicationCapabilities which we defined in the Capabilities section in this file
+  Capabilities:
+    <<: *ApplicationCapabilities
+
+
+
+
+# Defines the policies that govern the highest level of the channel config 
+# For an application channel, these policies govern the hashing algorithm, the data hashing structure used to create new blocks, and the channel capability level
+# For a system channel, these policies also govern the creation or removal of consortiums of peer orgs
+# For channel policies, their canonical path is /Channel/<PolicyName>
+Channel: &ChannelDefaults
+  Policies:
+    # Who can invoke the "Deliver" API
+    Readers:
+      Type: ImplicitMeta
+      Rule: "ANY Readers"
+    # Who can invoke the "Broadcast" API
+    Writers:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+    # Who can modify elements at this config level
+    Admins:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Admins"
+  
+  Capabilities:
+    <<: *ChannelCapabilities
+
+
+
+
+# Define the channel profiles which are used to build a channel configuration
+# Each profile uses YAML syntax (<<: *name) to reference information from other sections of the file
+# configtxgen tool uses this configuration to create a channel creation transaction for application channels, or to write the channel genesis block for a system channel 
+Profiles:
+  # This is used to create the system channel genesis block
+  # The system channel defines the ordering service administrators, and includes a set of peer organizations that belong to the blockchain consortium (a collection of non-orderer organizations)
+  Genesis:
+    <<: *ChannelDefaults
+    Orderer:
+      # We reference the OrdererDefaults (Which is a solo service) which was defined in the Orderer section of configtx.yaml
+      <<: *OrdererDefaults
+      Organizations:
+        - *OrdererA
+        # - *OrdererB
+      Capabilities:
+        <<: *OrdererCapabilities
+    
+    # Define the consortiums here, which will be used to create application channels 
+    Consortiums:
+      AllBanksConsortium:
+        # The names of the organizations belonging to this consortium. The names are defined in the Organizations section of configtx.yaml as &BankA, &BankB, etc..
+        Organizations:
+          - *BankA
+      
+      TwoBanksConsortium:
+        Organizations:
+          - *BankA
+  
+  AllBanksChannel:
+    # We use AllBanksConsortium, which is hosted by the system channel (We defined this consortium in the Genesis profile)
+    # hence, the ordering service defined in the Genesis profile becomes the channel consenter set 
+    # The consenter set is the group of ordering nodes that have the ability to create new blocks & distribute them to peers joined to the channel
+    Consortium: AllBanksConsortium
+    <<: *ChannelDefaults
+    Application:
+      <<: *ApplicationDefaults
+      # Organizations to include as channel members
+      Organizations:
+        - *BankA
+      Capabilities:
+        <<: *ApplicationCapabilities
+
+  TwoBanksChannel:
+    Consortium: TwoBanksConsortium
+    <<: *ChannelDefaults
+    Application:
+      <<: *ApplicationDefaults
+      Organizations:
+        - *BankA
+      Capabilities:
+        <<: *ApplicationCapabilities
+  
+
+
+
+
+
+

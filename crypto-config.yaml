@@ -1,0 +1,54 @@
+# It generates the cryptographic materials, including certs & signing keys for MSPs, peer and orderer nodes
+# We define two types of organizations here: 
+# - OrdererOrgs which are organizations that manage orderer nodes
+# - PeerOrgs which are organizations that manage peer nodes
+# This will be run using "cryptogen generate --config=./crypto-config.yaml"
+
+# ---------------------------------------------------------------------------
+# "OrdererOrgs" - Definition of organizations managing orderer nodes
+# ---------------------------------------------------------------------------
+OrdererOrgs:
+  # Name of the orderer
+  - Name: OrdererA
+  # Domain URL of the orderer
+    Domain: orderer_a.net
+    # Enable OUs for our orderer organizations (OUs: client, peer, admin and member)
+    EnableNodeOUs: true
+    Specs:
+      - Hostname: orderer
+  - Name: OrdererB
+    Domain: orderer_b.net
+    EnableNodeOUs: true
+    Specs:
+      - Hostname: orderer
+
+# ---------------------------------------------------------------------------
+# "PeerOrgs" - Definition of organizations managing peer nodes
+# ---------------------------------------------------------------------------
+PeerOrgs:
+  - Name: BankA
+    Domain: bank_a.trade.com
+    # Enable node organizational units, which break down our organizations into further departments
+    EnableNodeOUs: true
+    Template:
+      # 2 peers nodes in the organization
+      Count: 2
+    Users:
+      # 1 non-admin user in the organization, in addition to 1 admin user that is created by default
+      Count: 1
+
+  - Name: BankB
+    Domain: bank_b.trade.com
+    EnableNodeOUs: true
+    Template:
+      Count: 2
+    Users:
+      Count: 1
+  
+  - Name: BankC
+    Domain: bank_c.trade.com
+    EnableNodeOUs: true
+    Template:
+      Count: 2
+    Users:
+      Count: 1
