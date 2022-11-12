@@ -3,15 +3,25 @@
 # the ordering nodes that can add new blocks on the channel, and the policies that govern channel updates
 
 
+
+################################################################################
+#
+#   ORGANIZATIONS
+#
+#   This section defines the organizational identities that can be referenced
+#   in the configuration profiles.
+#
+################################################################################
 # Lists the member organizations of a channel
 # Each organization is identified by an MSP ID and a channel MSP
 # The channel MSP is stored in the channel configuration and contains the certificates that are used to identify nodes, applications & admins of an organization
 Organizations:
     # We use the anchor element ("&"), so that we can refer to this organization from other parts of the .yaml file (refer as BankA)
     - &BankA
-      # Name of the organization 
+      # The name and ID attributes can include alphanumeric characters, dots and dashes
+      # The key by which this org wil be referenced in channel configuration transactions
       Name: BankA
-      # Name of the organization's MSP
+      # The key by which this org's MSP definition will be referenced.
       ID: BankAMSP
       # Location of the organization's cryptographic material. The configtxgen tool uses this MSP folder to create the channel MSP
       # This MSP folder needs to contain the following information, which will be transferred to the channel MSP & stored in the channel configuration
@@ -99,7 +109,7 @@ Organizations:
       Name: OrdererA
       ID: OrdererAMSP
       MSPDir: crypto-config/ordererOrganizations/orderer_a.net/msp
-      # A list of all orderers this organization runs, which clients and peers can connect to to push transactions & receive blocks respectively
+      # A list of all orderers this organization runs, which clients and peers can connect to, to push transactions & receive blocks respectively
       OrdererEndpoints:
         - "orderer.orderer_a.net:7050"
       Policies:
@@ -131,90 +141,110 @@ Organizations:
         Admins:
           Type: Signature
           Rule: "OR('OrdererBMSP.admin')"
-
-
-
-
-# Define the ordering service
-Orderer: &OrdererDefaults
-  # Can be solo, kafka or raft
-  OrdererType: solo
-  # A list of orderer addresses that clients and peers can connect to
-  # Addresses: 
-  #   - orderer_a.net:7050
-  #   - orderer_b.net:7050
-  # Amount of time to wait before creating a batch
-  BatchTimeout: 2s
-  BatchSize:
-    # Max number of messages to permit in a batch. No block will contain more than this number of messages
-    MaxMessageCount: 10
-    # Absolute maximum number of bytes allowed for serialized messages in a batch
-    AbsoluteMaxBytes: 10 MB
-    # A batch will fill with messages until this size is reached. If adding a new message to the batch causes the batch to exceed
-    # preferred max bytes, the current batch is closed & written to a block, and a new batch containing the new message is created
-    # Messages may be larger than preferred max bytes, but up to AbsoluteMaxBytes
-    PreferredMaxBytes: 2 MB
-  # Maximum number of channels to allow on the ordering network. When set to 0, implies no maximum number
-  MaxChannels: 0
-
-  EtcdRaft:
-    Consenters:
-      - Host: orderer.orderer_a.net
-        Port: 7050
-        ClientTLSCert: crypto-config/ordererOrganizations/orderer_a.net/orderers/orderer.orderer_a.net/tls/server.crt
-        ServerTLSCert: crypto-config/ordererOrganizations/orderer_a.net/orderers/orderer.orderer_a.net/tls/server.crt
-      - Host: orderer.orderer_b.net
-        Port: 7050
-        ClientTLSCert: crypto-config/ordererOrganizations/orderer_b.net/orderers/orderer.orderer_b.net/tls/server.crt
-        ServerTLSCert: crypto-config/ordererOrganizations/orderer_b.net/orderers/orderer.orderer_b.net/tls/server.crt
-
-  # For orderer policies, their canonical path is /Channel/Orderer/<PolicyName>
-  Policies:
-    Readers:
-      Type: ImplicitMeta
-      # "Readers" here will reference the "Readers" signature policy defined in the ordering organizations. 
-      Rule: "ANY Readers"
-    # Indicates who has write access for block creation
-    Writers:
-      Type: ImplicitMeta
-      # Here, we indicate that every member of the orderer organizations that has write access to its organization,
-      # posesses write access for block creation
-      Rule: "ANY Writers"
-    Admins:
-      Type: ImplicitMeta
-      Rule: "MAJORITY Admins"
-    # Specifies what signatures must be included in the block from the orderer for the peer to validate it
-    BlockValidation:
-      Type: ImplicitMeta
-      Rule: "ANY Writers"
   
 
 
 
+################################################################################
+#
+#   CAPABILITIES
+#
+# This section defines the capabilities of fabric network. 
+# This is a new concept as of v1.1.0 and should not be utilized in mixed networks with v1.0.x peers and orderers.  
+# Capabilities define features which must be present in a fabric binary for that binary to safely participate in the fabric network.  
+# For instance, if a new MSP type is added, newer binaries might recognize and validate the signatures from this type, 
+# while older binaries without this support would be unable to validate those transactions.  
+# This could lead to different versions of the fabric binaries having different world states.  
+# Instead, defining a capability for a channel informs those binaries without this capability that they must cease 
+# processing transactions until they have been upgraded.  
+# For v1.0.x if any capabilities are defined (including a map with all capabilities turned off) then the v1.0.x peer will deliberately crash.
+#
+################################################################################
 # Capabilities define which features must be present in a fabric binary for that binary to safely participate in the fabric network
 Capabilities:
-  # Govern tasks that are jointly administered by the peer organizations and the ordering service
-  # Sets the minimum version of Fabric that can be run by peer & ordering nodes
+  # Channel capabilities apply to both the orderers and the peers and must be supported by both
   Channel: &ChannelCapabilities
+    # V3.0 for Channel is a catchall flag for behavior which has been determined to be desired for 
+    # all orderers and peers running at the v3.0.0 level, but which would be incompatible with orderers and peers from prior releases.
+    # Prior to enabling V3.0 channel capabilities, ensure that all orderers and peers on a channel are at v3.0.0 or later.
     V3_0: true
   
-  # Govern tasks & processing exclusive to the ordering service
-  # Sets the minimum version of Fabric binaries that can be run by ordering nodes
+  # Orderer capabilities apply only to the orderers, and may be safely used with prior release peers
   Orderer: &OrdererCapabilities
     V2_0: true
 
-  # Govern tasks and processing exclusive to the peers
-  # Sets the minimum version of Fabric binaries can be run by peer nodes
+  # Application capabilities apply only to the peer network, and may be safely used with prior release orderers
   Application: &ApplicationCapabilities
     V2_0: true
 
 
 
 
+################################################################################
+#
+#   APPLICATION
+#
+#   This section defines the values to encode into a config transaction or
+#   genesis block for application-related parameters.
+#
+################################################################################
 # Defines the policies that govern how peer organizations can interact with application channels
 # These policies govern the number of peer orgs that need to approve a chaincode definition or sign a request to update the channel config
 # These policies are also used to restrict access to channel resources, such as the ability to write to the channel ledger or query channel events
 Application: &ApplicationDefaults
+  # https://hyperledger-fabric.readthedocs.io/en/latest/access_control.html
+  # Fabric uses ACLs to manage access to resources by associating a policy with a resource
+  # The convention adopted here is <component>/<resource>, so cscc/GetConfigBlock is the resource for the GetConfigBlock call in the cscc component
+  # Access control can be updated in one of two ways:
+  #   1. Edit configtx.yaml file itself, which will be used when creating new channel configurations
+  #   2. Updating access control in the channel configuration of an existing channel
+
+  # An example of the ACLs:
+  #   peer/Propose: /Channel/Application/Writers
+  #   This ACL defines that access to peer/Propose resource is restricted to identities satisfying the policy defined at the 
+  #   canonical path /Channel/Application/Writers, 
+  #   where this /Channel/Application/Writers policy is defined under the "Application > Policies" section in configtx.yaml 
+  ACLs: &ACLsDefault
+
+    #---New Lifecycle System Chaincode (_lifecycle) function to policy mapping for access control--#
+    _lifecycle/CheckCommitReadiness: /Channel/Application/Writers
+    # ACL policy for _lifecycle's "CommitChaincodeDefinition" function
+    _lifecycle/CommitChaincodeDefinition: /Channel/Application/Writers
+    # ACL policy for _lifecycle's "QueryChaincodeDefinition" function
+    _lifecycle/QueryChaincodeDefinition: /Channel/Application/Writers
+    # ACL policy for _lifecycle's "QueryChaincodeDefinitions" function
+    _lifecycle/QueryChaincodeDefinitions: /Channel/Application/Writers
+
+    #---Query System Chaincode (qscc) function to policy mapping for access control---#
+    # ACL policy for qscc's "GetChainInfo" function
+    qscc/GetChainInfo: /Channel/Application/Readers
+    # ACL policy for qscc's "GetBlockByNumber" function
+    qscc/GetBlockByNumber: /Channel/Application/Readers
+    # ACL policy for qscc's  "GetBlockByHash" function
+    qscc/GetBlockByHash: /Channel/Application/Readers
+    # ACL policy for qscc's "GetTransactionByID" function
+    qscc/GetTransactionByID: /Channel/Application/Readers
+    # ACL policy for qscc's "GetBlockByTxID" function
+    qscc/GetBlockByTxID: /Channel/Application/Readers
+
+    #---Configuration System Chaincode (cscc) function to policy mapping for access control---#
+    # ACL policy for cscc's "GetConfigBlock" function
+    cscc/GetConfigBlock: /Channel/Application/Readers
+    # ACL policy for cscc's "GetChannelConfig" function
+    cscc/GetChannelConfig: /Channel/Application/Readers
+
+    #---Miscellaneous peer function to policy mapping for access control---#
+    # ACL policy for invoking chaincodes on peer
+    peer/Propose: /Channel/Application/Writers
+    # ACL policy for chaincode to chaincode invocation
+    peer/ChaincodeToChaincode: /Channel/Application/Writers
+
+    #---Events resource to policy mapping for access control###---#
+    # ACL policy for sending block events
+    event/Block: /Channel/Application/Readers
+    # ACL policy for sending filtered block events
+    event/FilteredBlock: /Channel/Application/Readers
+
   # Lists the organizations participating in the application side of the network
   Organizations:
 
@@ -222,7 +252,7 @@ Application: &ApplicationDefaults
   # We use ImplicitMeta policies to define our Application policies. These ImplicitMeta policies uses the organization defined
   # Signature Policies for their Rule (E.g "ANY Readers" here will evaluate the "Readers" Signature policy of all peer organizations)
   # https://hyperledger-fabric.readthedocs.io/en/latest/policies/policies.html#fabric-chaincode-lifecycle
-  Policies:
+  Policies: &ApplicationDefaultPolicies
     Readers:
       # ImplicitMeta policies aggregate the result of policies deeper in the configuration tree that are ultimately defined by the organizations' Signature policies
       Type: ImplicitMeta
@@ -252,6 +282,119 @@ Application: &ApplicationDefaults
 
 
 
+################################################################################
+#
+#   ORDERER
+#
+#   This section defines the values to encode into a config transaction or
+#   genesis block for orderer related parameters.
+#
+################################################################################
+# Define the ordering service
+Orderer: &OrdererDefaults
+  # Can be solo, kafka or etcdraft
+  OrdererType: solo
+  
+  # Addresses used to be the list of orderer addresses that clients and peers could connect to. 
+  # However, this does not allow clients to associate orderer addresses and orderer organizations which can be useful for things such
+  # as TLS validation. 
+  # The preferred way to specify orderer addresses is now to include the OrdererEndpoints item in your org definition
+  Addresses: 
+    # - orderer_a.net:7050
+    # - orderer_b.net:7050
+
+  # Amount of time to wait before creating a batch
+  BatchTimeout: 2s
+  
+  # Controls the number of messages batched into a block. Messages may be considered to be Fabric transactions
+  # Blocks will be a few kb larger than batch size, when signatures, hashes & other metadata is applied
+  BatchSize:
+    # Max number of messages to permit in a batch. No block will contain more than this number of messages
+    MaxMessageCount: 10
+    # Absolute maximum number of bytes allowed for serialized messages in a batch
+    # Maximum block size is this value plus the size of the associated metadata (usually a few kb)
+    # It is recommended not to exceed 49 MB, given the default grpc max message size of 100 MB configured on orderer & peer nodes
+    AbsoluteMaxBytes: 10 MB
+    # A batch will fill with messages until this size is reached. If adding a new message to the batch causes the batch to exceed
+    # preferred max bytes, the current batch is closed & written to a block, and a new batch containing the new message is created
+    # Messages may be larger than preferred max bytes, but up to AbsoluteMaxBytes
+    PreferredMaxBytes: 2 MB
+  
+  # Maximum number of channels to allow on the ordering network. When set to 0, implies no maximum number
+  MaxChannels: 0
+
+  # Lists the orgs participating in the orderer side of the network
+  Organizations:
+
+  # Defines the set of policies at this level of the config tree
+  # For orderer policies, their canonical path is /Channel/Orderer/<PolicyName>
+  Policies:
+    Readers:
+      Type: ImplicitMeta
+      # "Readers" here will reference the "Readers" signature policy defined in the ordering organizations. 
+      Rule: "ANY Readers"
+    # Indicates who has write access for block creation
+    Writers:
+      Type: ImplicitMeta
+      # Here, we indicate that every member of the orderer organizations that has write access to its organization,
+      # possess write access for block creation
+      Rule: "ANY Writers"
+    Admins:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Admins"
+    # Specifies what signatures must be included in the block from the orderer for the peer to validate it
+    BlockValidation:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+
+  # Defines configuration which must be set when the "etcdraft" OrdererType is chosen
+  EtcdRaft:
+    Consenters:
+      - Host: orderer.orderer_a.net
+        Port: 7050
+        ClientTLSCert: crypto-config/ordererOrganizations/orderer_a.net/orderers/orderer.orderer_a.net/tls/server.crt
+        ServerTLSCert: crypto-config/ordererOrganizations/orderer_a.net/orderers/orderer.orderer_a.net/tls/server.crt
+      - Host: orderer.orderer_b.net
+        Port: 7050
+        ClientTLSCert: crypto-config/ordererOrganizations/orderer_b.net/orderers/orderer.orderer_b.net/tls/server.crt
+        ServerTLSCert: crypto-config/ordererOrganizations/orderer_b.net/orderers/orderer.orderer_b.net/tls/server.crt
+    
+    # Options to be specified for all the etcd/raft nodes.
+    #  The values here are the defaults for all new channels and can be modified on a per-channel basis via configuration updates.
+    Options:
+      # TickInterval is the time interval between two Node tick invocations.
+      TickInterval: 500ms
+
+      # ElectionTick is the number of Node tick invocations that must pass
+      # between elections. That is, if a follower does not receive any
+      # message from the leader of current term before ElectionTick has
+      # elapsed, it will become candidate and start an election.
+      # ElectionTick must be greater than HeartbeatTick.
+      ElectionTick: 10
+
+      # HeartbeatTick is the number of Node.Tick invocations that must
+      # pass between heartbeats. That is, a leader sends heartbeat
+      # messages to maintain its leadership every HeartbeatTick ticks.
+      HeartbeatTick: 1
+
+      # MaxInflightBlocks limits the max number of in-flight append messages
+      # during optimistic replication phase.
+      MaxInflightBlocks: 5
+
+      # SnapshotIntervalSize defines number of bytes per which a snapshot is taken
+      SnapshotIntervalSize: 16 MB
+
+
+
+
+################################################################################
+#
+#   CHANNEL
+#
+#   This section defines the values to encode into a config transaction or
+#   genesis block for channel related parameters.
+#
+################################################################################
 # Defines the policies that govern the highest level of the channel config 
 # For an application channel, these policies govern the hashing algorithm, the data hashing structure used to create new blocks, and the channel capability level
 # For a system channel, these policies also govern the creation or removal of consortiums of peer orgs
@@ -277,6 +420,15 @@ Channel: &ChannelDefaults
 
 
 
+################################################################################
+#
+#   PROFILES
+#
+#   The profiles which specify consortiums are to be used for generating the orderer genesis block. 
+# With the correct consortium members defined in the orderer genesis block, channel creation requests may be generated with 
+# only the org member names and a consortium name.
+#
+################################################################################
 # Define the channel profiles which are used to build a channel configuration
 # Each profile uses YAML syntax (<<: *name) to reference information from other sections of the file
 # configtxgen tool uses this configuration to create a channel creation transaction for application channels, or to write the channel genesis block for a system channel 
@@ -300,10 +452,13 @@ Profiles:
         # The names of the organizations belonging to this consortium. The names are defined in the Organizations section of configtx.yaml as &BankA, &BankB, etc..
         Organizations:
           - *BankA
+          - *BankB
+          - *BankC
       
       TwoBanksConsortium:
         Organizations:
           - *BankA
+          - *BankB
   
   AllBanksChannel:
     # We use AllBanksConsortium, which is hosted by the system channel (We defined this consortium in the Genesis profile)
@@ -316,6 +471,8 @@ Profiles:
       # Organizations to include as channel members
       Organizations:
         - *BankA
+        - *BankB
+        - *BankC
       Capabilities:
         <<: *ApplicationCapabilities
 
@@ -326,12 +483,6 @@ Profiles:
       <<: *ApplicationDefaults
       Organizations:
         - *BankA
+        - *BankB
       Capabilities:
         <<: *ApplicationCapabilities
-  
-
-
-
-
-
-
