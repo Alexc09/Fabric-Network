@@ -1,6 +1,9 @@
 #!/bin/bash
 # This script is used to generate the crypto material + genesis block + channel config txs
 
+# Delete the existing configs
+rm -r crypto-config channel-artifacts-output channel-artifacts
+
 
 # Step 1: Generate cryptographic material
 cryptogen generate --config=./crypto-config.yaml --output=crypto-config
@@ -12,6 +15,12 @@ configtxgen -profile Genesis -channelID system-channel -outputBlock ./channel-ar
 # Step 3: Generate the channel configuation transactions for our two channels
 configtxgen -profile AllBanksChannel -channelID all-banks-channel -outputCreateChannelTx ./channel-artifacts/AllBanksChannel/channel.tx
 configtxgen -profile TwoBanksChannel -channelID two-banks-channel -outputCreateChannelTx ./channel-artifacts/TwoBanksChannel/channel.tx
+
+ARTIFACT_OUTPUT_DIR="./channel-artifacts-output"
+if [ ! -d $ARTIFACT_OUTPUT_DIR ]; then
+    echo "Creating drectory ${ARTIFACT_OUTPUT_DIR}"
+    mkdir $ARTIFACT_OUTPUT_DIR
+fi
 
 configtxgen -inspectBlock ./channel-artifacts/genesis.block > ./channel-artifacts-output/genesis.json
 configtxgen -inspectChannelCreateTx ./channel-artifacts/AllBanksChannel/channel.tx > ./channel-artifacts-output/AllBanksChannelTx.json
