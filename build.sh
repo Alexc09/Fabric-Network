@@ -15,6 +15,7 @@ configtxgen -profile Genesis -channelID system-channel -outputBlock ./channel-ar
 # Step 3: Generate the channel configuation transactions for our two channels
 configtxgen -profile AllBanksChannel -channelID all-banks-channel -outputCreateChannelTx ./channel-artifacts/AllBanksChannel/channel.tx
 configtxgen -profile TwoBanksChannel -channelID two-banks-channel -outputCreateChannelTx ./channel-artifacts/TwoBanksChannel/channel.tx
+configtxgen -profile OneBankChannel -channelID one-bank-channel -outputCreateChannelTx ./channel-artifacts/OneBankChannel/channel.tx
 
 ARTIFACT_OUTPUT_DIR="./channel-artifacts-output"
 if [ ! -d $ARTIFACT_OUTPUT_DIR ]; then
@@ -25,6 +26,7 @@ fi
 configtxgen -inspectBlock ./channel-artifacts/genesis.block > ./channel-artifacts-output/genesis.json
 configtxgen -inspectChannelCreateTx ./channel-artifacts/AllBanksChannel/channel.tx > ./channel-artifacts-output/AllBanksChannelTx.json
 configtxgen -inspectChannelCreateTx ./channel-artifacts/TwoBanksChannel/channel.tx > ./channel-artifacts-output/TwoBanksChannelTx.json
+configtxgen -inspectChannelCreateTx ./channel-artifacts/OneBankChannel/channel.tx > ./channel-artifacts-output/OneBankChannelTx.json
 
 # Step 4: Generate the anchor peer configuration transactions for our organizations
 # This is used for cross-organization ledger syncing using the Fabric gossip protocol

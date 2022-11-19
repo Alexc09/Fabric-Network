@@ -462,6 +462,10 @@ Profiles:
         Organizations:
           - *BankA
           - *BankB
+
+      OneBankConsortium:
+        Organizations:
+          - *BankA
   
   AllBanksChannel:
     # We use AllBanksConsortium, which is hosted by the system channel (We defined this consortium in the Genesis profile)
@@ -487,5 +491,15 @@ Profiles:
       Organizations:
         - *BankA
         - *BankB
+      Capabilities:
+        <<: *ApplicationCapabilities
+
+  OneBankChannel:
+    Consortium: OneBankConsortium
+    <<: *ChannelDefaults
+    Application:
+      <<: *ApplicationDefaults
+      Organizations:
+        - *BankA
       Capabilities:
         <<: *ApplicationCapabilities
