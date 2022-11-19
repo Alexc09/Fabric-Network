@@ -13,6 +13,9 @@ export FABRIC_LOGGING_SPEC=INFO
 #   export ORDERER_FILELEDGER_LOCATION="/var/hyperledger/development/orderer"
 #   This will overwrite the Fileledger/Location section in orderer.yaml
 
+# Run this orderer as orderer organization A
+export ORDERER_GENERAL_LOCALMSPDIR=$PWD/crypto-config/ordererOrganizations/orderer_a.net/orderers/orderer.orderer_a.net/msp
+
 export ORDERER_FILELEDGER_LOCATION=$PWD/production/orderer
 export ORDERER_DEBUG_BROADCASTTRACEDIR=$FABRIC_FILELEDGER_LOCATION/logs/broadcast
 export ORDERER_DEBUG_BROADCASTTRACEDIR=$FABRIC_FILELEDGER_LOCATION/logs/deliver

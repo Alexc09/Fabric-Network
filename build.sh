@@ -8,11 +8,14 @@ rm -r crypto-config channel-artifacts-output channel-artifacts
 # Step 1: Generate cryptographic material
 cryptogen generate --config=./crypto-config.yaml --output=crypto-config
 
+# Points to the folder with configtx.yaml (In this case, it's PWD because build.sh and configtx.yaml are in the same folder)
+export FABRIC_CFG_PATH=$PWD
+
 # Step 2: Create the genesis block to bootstrap the ordering service and will serve as the first block of the orderer system channel
 # This block is maintained by the ordering service nodes to track the various application channels created within the network
 configtxgen -profile Genesis -channelID system-channel -outputBlock ./channel-artifacts/genesis.block
 
-# Step 3: Generate the channel configuation transactions for our two channels
+# Step 3: Generate the channel configuation transactions for our three channels
 configtxgen -profile AllBanksChannel -channelID all-banks-channel -outputCreateChannelTx ./channel-artifacts/AllBanksChannel/channel.tx
 configtxgen -profile TwoBanksChannel -channelID two-banks-channel -outputCreateChannelTx ./channel-artifacts/TwoBanksChannel/channel.tx
 configtxgen -profile OneBankChannel -channelID one-bank-channel -outputCreateChannelTx ./channel-artifacts/OneBankChannel/channel.tx

@@ -1,7 +1,7 @@
 #! /bin/bash
 
 # https://hyperledger-fabric.readthedocs.io/en/latest/commands/peerchannel.html
-# This script is used to create and join a channel 
+# This script is used for the admin organization to create a channel and join it
 
 case $1 in PeerA|PeerB|PeerC)
         echo "Launching $1"
@@ -18,7 +18,7 @@ esac
 # -o: The orderer endpoint
 # -c: The channelID which we specifed in the configtxgen command when generating the channel configuration transaction
 # -f: The filepath to the channel configuration transaction file
-peer channel create -o localhost:7050 -c one-bank-channel -f channel-artifacts/OneBankChannel/channel.tx --outputBlock channel-artifacts/OneBankChannel
+peer channel create -o localhost:7050 -c one-bank-channel -f channel-artifacts/OneBankChannel/channel.tx --outputBlock channel-artifacts/OneBankChannel/one-bank-channel.block
 
 # Join the channel, passing in the orderer endpoint and the genesis block of our channel
 peer channel join -o localhost:7050 -b channel-artifacts/OneBankChannel/one-bank-channel.block

@@ -10,9 +10,11 @@ if [ $# -eq 0 ]; then
 fi
 
 if [ "$1" == "PeerA" ]; then
-    # Where peer will store data
+    # path where peer stores data (the ledger)
     export CORE_PEER_FILESYSTEMPATH=$PWD/production/peer/peerA
+    # Path of the MSP local configuration of the organization admin
     export CORE_PEER_MSPCONFIGPATH=$PWD/crypto-config/peerOrganizations/bank_a.trade.com/users/Admin@bank_a.trade.com/msp
+    # Path where peer stores ledger snapshots
     export CORE_LEDGER_SNAPSHOTS_ROOTDIR=$PWD/production/peer/peerA/snapshots
 elif [ "$1" == "PeerB" ]; then
     export CORE_PEER_FILESYSTEMPATH=$PWD/production/peer/peerB
