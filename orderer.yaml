@@ -59,6 +59,7 @@ General:
   BootstrapFile: ./channel-artifacts/genesis.block
 
   # LocalMSPDir is where to find the private crypto material needed by the orderer
+  # This is where you set the identity as the orderer from ordererA organization
   LocalMSPDir: ./crypto-config/ordererOrganizations/orderer_a.net/orderers/orderer.orderer_a.net/msp
   
   # LocalMSPID is the identity to register the local MSP material with the msp manager

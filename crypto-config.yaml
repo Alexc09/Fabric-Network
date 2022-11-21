@@ -31,10 +31,11 @@ PeerOrgs:
     # Enable node organizational units, which break down our organizations into further departments
     EnableNodeOUs: true
     Template:
-      # 2 peers nodes in the organization
+      # 2 peers nodes in the organization (Seen under /crypto-config/peerOrganizations/bank_a.trade.com/peers)
       Count: 2
     Users:
       # 1 non-admin user in the organization, in addition to 1 admin user that is created by default
+      # Seen under /crypto-config/peerOrganizations/bank_a.trade.com/users
       Count: 1
 
   - Name: BankB

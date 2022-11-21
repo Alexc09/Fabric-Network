@@ -10,5 +10,5 @@ export CC_VERSION=1.0
 export CC_LABEL=${CC_NAME}_${CC_VERSION}
 # The name of the .tar.gz file
 export CC_PACKAGE_FILE=${CC_NAME}.tar.gz
-# The folder the .tar.gz file is in
-export CC_PACKAGE_FOLDER=$PWD/bank-chaincode
+# The folder the chaincode is in
+# export CC_PACKAGE_FOLDER=$PWD/bank-chaincode

@@ -16,5 +16,8 @@ esac
 # . peer_set_env.sh PeerA
 . peer_set_env.sh $1
 
+# Set the peer to listen on port 7051
+# export CORE_PEER_ADDRESS=0.0.0.0:7051
+
 # Launch the peer
 peer node start

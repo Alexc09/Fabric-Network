@@ -61,7 +61,7 @@ Organizations:
         # Who can endorse transactions
         Endorsement:
           Type: Signature
-          Rule: "OR('BankAMSP.peer')"
+          Rule: "OR('BankAMSP.admin', 'BankAMSP.peer')"
 
     - &BankB
       Name: BankB
@@ -82,7 +82,7 @@ Organizations:
           Rule: "OR('BankBMSP.admin')"
         Endorsement:
           Type: Signature
-          Rule: "OR('BankBMSP.peer')"
+          Rule: "OR('BankBMSP.admin', 'BankBMSP.peer')"
 
     - &BankC
       Name: BankC
@@ -103,7 +103,7 @@ Organizations:
           Rule: "OR('BankCMSP.admin')"
         Endorsement:
           Type: Signature
-          Rule: "OR('BankCMSP.peer')"
+          Rule: "OR('BankCMSP.admin', 'BankCMSP.peer')"
           
     - &OrdererA
       Name: OrdererA
@@ -267,7 +267,7 @@ Application: &ApplicationDefaults
     Admins:
       Type: ImplicitMeta
       Rule: "MAJORITY Admins"
-    # Governs who needs to approve a chaincode definition
+    # Governs who needs to approve a chaincode definition before it can be committed to the channel
     LifecycleEndorsement:
       Type: ImplicitMeta
       Rule: "MAJORITY Endorsement"
@@ -303,6 +303,9 @@ Orderer: &OrdererDefaults
   # as TLS validation. 
   # The preferred way to specify orderer addresses is now to include the OrdererEndpoints item in your org definition
   Addresses: 
+    # - localhost:7050
+    # If you're using any ip that isn't localhost, you have to add the domain to the /etc/hosts file and resolve it to localhost
+    # 127.0.0.1       orderer.orderer_a.net
     - orderer.orderer_a.net:7050
     # - orderer.orderer_b.net:7050
 
