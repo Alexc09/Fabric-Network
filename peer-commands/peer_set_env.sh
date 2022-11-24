@@ -34,7 +34,7 @@ elif [ "$1" == "PeerC" ]; then
 fi;
 
 # Points to the folder with core.yaml. The peer binary uses this env var
-export FABRIC_CFG_PATH=$PWD
+export FABRIC_CFG_PATH=$PWD/../
 # Controls the log verbosity (FATAL, PANIC, ERROR, WARNING, INFO, DEBUG)
 export FABRIC_LOGGING_SPEC=INFO
 

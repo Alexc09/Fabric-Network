@@ -1,55 +1,40 @@
 # Using version 2 of docker compose
 version: "2"
 
-# By default, an attachable overlay network is created
-# Any service can reach other service's at that service's name
-# Ports are set as HOST_PORT:CONTAINER_PORT
-# Service to service communications uses the CONTAINER_PORT
-# For instance, our orderer runs on container port 5000. If our peer wants to connect to the orderer container, it uses port 5000
-networks:
-    - bank-network
-
-# Volumes to persist our container data
-volumes:
-  # The localFileSystem for PeerA
-  peerAFileSystem:
-    driver: local
-    driver_opts:
-      type: "none"
-      o: "bind"
-      # The folder on our host device
-      device: "${PROJECT_ROOT_FOLDER}/production/peer/peerA"
-
-  peerBFileSystem:
-    driver: local
-    driver_opts:
-      type: "none"
-      o: "bind"
-      device: "${PROJECT_ROOT_FOLDER}/production/peer/peerB"
-
-  peerCFileSystem:
-    driver: local
-    driver_opts:
-      type: "none"
-      o: "bind"
-      device: "${PROJECT_ROOT_FOLDER}/production/peer/peerC"
-  
-  ordererAFileSystem:
-    driver: local
-    driver_opts:
-      type: "none"
-      o: "bind"
-      device: "${PROJECT_ROOT_FOLDER}/production/orderer/ordererA"
-
-  ordererBFileSystem:
-    driver: local
-    driver_opts:
-      type: "none"
-      o: "bind"
-      device: "${PROJECT_ROOT_FOLDER}/production/orderer/ordererB"
-
-
 services:
+  orderer-base:
+    image: hyperledger/fabric-orderer:$IMAGE_TAG
+    command: orderer
+    environment:
+      # The location of our orderer.yaml file is in the /fabric-network local folder, which is binded to /var/hyperledger/orderer/config container folder
+      - FABRIC_CFG_PATH=/var/hyperledger/orderer/config
+      - FABRIC_LOGGING_SPEC=INFO
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+      # Directory to store blocks in
+      - ORDERER_FILELEDGER_LOCATION=/var/hyperledger/production/orderer
+      # Local address orderer listens on
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      # Port that orderer listens on
+      - ORDERER_GENERAL_LISTENPORT=7050
+      # Method to obtain the genesis block
+      - ORDERER_GENERAL_BOOTSTRAPMETHOD=file
+      # Path to the genesis block
+      - ORDERER_GENERAL_BOOTSTRAPFILE=/var/hyperledger/orderer/genesis.block
+      - ORDERER_GENERAL_TLS_ENABLED=false
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt]
+      - ORDERER_DEBUG_BROADCASTTRACEDIR=/var/hyperledger/orderer/logs/broadcast
+      - ORDERER_DEBUG_DELIVERTRACEDIR=/var/hyperledger/orderer/logs/deliver
+    volumes:
+      # Set our /fabric-network local folder to be located at /var/hyperledger/config folder in the container
+      - ${PROJECT_ROOT_FOLDER}:/var/hyperledger/orderer/config
+      # Provide the relative path to the genesis.block file
+      - ${PROJECT_ROOT_FOLDER}/channel-artifacts/genesis.block:/var/hyperledger/orderer/genesis.block
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    networks:
+      - bank-network
+
   peer-base:
     image: hyperledger/fabric-peer:${IMAGE_TAG}
     # The command the container executes when it is launched
@@ -86,57 +71,3 @@ services:
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
     networks:
       - bank-network
-
-
-  orderer-base:
-    image: hyperledger/fabric-orderer:$IMAGE_TAG
-    command: orderer
-    environment:
-      # The location of our orderer.yaml file is in the /fabric-network local folder, which is binded to /var/hyperledger/orderer/config container folder
-      - FABRIC_CFG_PATH=/var/hyperledger/orderer/config
-      - FABRIC_LOGGING_SPEC=INFO
-      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
-      # Directory to store blocks in
-      - ORDERER_FILELEDGER_LOCATION=/var/hyperledger/production/orderer
-      # Local address orderer listens on
-      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
-      # Port that orderer listens on
-      - ORDERER_GENERAL_LISTENPORT=7050
-      # Method to obtain the genesis block
-      - ORDERER_GENERAL_BOOTSTRAPMETHOD=file
-      # Path to the genesis block
-      - ORDERER_GENERAL_BOOTSTRAPFILE=/var/hyperledger/orderer/genesis.block
-      - ORDERER_GENERAL_TLS_ENABLED=false
-      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
-      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
-      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt]
-      - ORDERER_DEBUG_BROADCASTTRACEDIR=/var/hyperledger/orderer/logs/broadcast
-      - ORDERER_DEBUG_DELIVERTRACEDIR=/var/hyperledger/orderer/logs/deliver
-    volumes:
-      # Set our /fabric-network local folder to be located at /var/hyperledger/config folder in the container
-      - ${PROJECT_ROOT_FOLDER}:/var/hyperledger/orderer/config
-      - ${PROJECT_ROOT_FOLDER}/channel-artifacts/genesis.block:/var/hyperledger/orderer/genesis.block
-    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
-    networks:
-      - bank-network
-
-
-  # Tools container used for managing peers. We use this container to run commands (E.g peer lifecycle chaincode queryinstalleds)
-  tools:
-    image: hyperledger/fabric-tools:$IMAGE_TAG
-    container_name: tools
-    command: /bin/bash
-    tty: true
-    stdin_open: true
-    environment:
-      - FABRIC_CFG_PATH=/var/hyperledger
-      - FABRIC_LOGGING_SPEC=INFO
-    volumes:
-      # Map our project directory to /var/hyperledger
-      - ${PROJECT_ROOT_FOLDER}:/var/hyperledger
-      # VM docker stream folder mapping
-      - /var/run/:/host/var/run/
-    # This is the working directory on login
-    working_dir: /opt/scripts
-    networks:
-      - airline

@@ -1,5 +1,54 @@
 version: "2"
 
+
+# By default, an attachable overlay network is created
+# Any service can reach other service's at that service's name
+# Ports are set as HOST_PORT:CONTAINER_PORT
+# Service to service communications uses the CONTAINER_PORT
+# For instance, our orderer runs on container port 5000. If our peer wants to connect to the orderer container, it uses port 5000
+networks:
+  bank-network:
+
+# Volumes to persist our container data
+volumes:
+  # The localFileSystem for PeerA
+  peerAFileSystem:
+    driver: local
+    driver_opts:
+      type: "none"
+      o: "bind"
+      # The folder on our host device
+      device: "${PROJECT_ROOT_FOLDER}/production/peer/peerA"
+
+  peerBFileSystem:
+    driver: local
+    driver_opts:
+      type: "none"
+      o: "bind"
+      device: "${PROJECT_ROOT_FOLDER}/production/peer/peerB"
+
+  peerCFileSystem:
+    driver: local
+    driver_opts:
+      type: "none"
+      o: "bind"
+      device: "${PROJECT_ROOT_FOLDER}/production/peer/peerC"
+  
+  ordererAFileSystem:
+    driver: local
+    driver_opts:
+      type: "none"
+      o: "bind"
+      device: "${PROJECT_ROOT_FOLDER}/production/orderer/ordererA"
+
+  ordererBFileSystem:
+    driver: local
+    driver_opts:
+      type: "none"
+      o: "bind"
+      device: "${PROJECT_ROOT_FOLDER}/production/orderer/ordererB"
+
+      
 services:
   orderer-A:
     container_name: ordererA
@@ -50,3 +99,26 @@ services:
     # The specified services (orderer-A) will start before this service (peer-A) is started
     depends_on:
       - orderer-A
+
+  # Tools container used for managing peers. We use this container to run commands (E.g peer lifecycle chaincode queryinstalleds)
+  tools:
+    image: hyperledger/fabric-tools:$IMAGE_TAG
+    container_name: tools
+    command: /bin/bash
+    tty: true
+    stdin_open: true
+    environment:
+      - FABRIC_CFG_PATH=/var/hyperledger
+      - FABRIC_LOGGING_SPEC=INFO
+    volumes:
+      # Map our project directory to /var/hyperledger
+      - ${PROJECT_ROOT_FOLDER}:/var/hyperledger
+      # VM docker stream folder mapping
+      - /var/run/:/host/var/run/
+    # This is the working directory on login
+    working_dir: /opt/scripts
+    networks:
+      - airline
+
+  
+
