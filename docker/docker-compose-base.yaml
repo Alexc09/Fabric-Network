@@ -1,0 +1,173 @@
+# Using version 2 of docker compose
+version: "2"
+
+# By default, an attachable overlay network is created
+# Any service can reach other service's at that service's name
+# Ports are set as HOST_PORT:CONTAINER_PORT
+# Service to service communications uses the CONTAINER_PORT
+# For instance, our orderer runs on container port 5000. If our peer wants to connect to the orderer container, it uses port 5000
+networks:
+    - bank-network
+
+# Volumes to persist our container data
+volumes:
+  # The localFileSystem for PeerA
+  peerAFileSystem:
+    driver: local
+    driver_opts:
+      type: "none"
+      o: "bind"
+      # The folder on our host device
+      device: "${PROJECT_ROOT_FOLDER}/production/peer/peerA"
+
+  peerBFileSystem:
+    driver: local
+    driver_opts:
+      type: "none"
+      o: "bind"
+      device: "${PROJECT_ROOT_FOLDER}/production/peer/peerB"
+
+  peerCFileSystem:
+    driver: local
+    driver_opts:
+      type: "none"
+      o: "bind"
+      device: "${PROJECT_ROOT_FOLDER}/production/peer/peerC"
+  
+  ordererAFileSystem:
+    driver: local
+    driver_opts:
+      type: "none"
+      o: "bind"
+      device: "${PROJECT_ROOT_FOLDER}/production/orderer/ordererA"
+
+  ordererBFileSystem:
+    driver: local
+    driver_opts:
+      type: "none"
+      o: "bind"
+      device: "${PROJECT_ROOT_FOLDER}/production/orderer/ordererB"
+
+
+services:
+  peer-base:
+    image: hyperledger/fabric-peer:${IMAGE_TAG}
+    # The command the container executes when it is launched
+    command: peer node start
+    # Set all the common environment variables for our peers
+    environment:
+      # The location of our core.yaml file is in the /fabric-network local folder, which is binded to /var/hyperledger/config container folder
+      - FABRIC_CFG_PATH=/var/hyperledger/config
+      # Set the overlay network used by our containers. So the chaincode container can communicate with the peer containers
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=${COMPOSE_PROJECT_NAME}_bank-network
+      - FABRIC_LOGGING_SPEC=INFO
+      # Path to the MSP folder
+      - CORE_PEER_MSPCONFIGPATH=/var/hyperledger/msp
+      # The location of our peer ledger
+      - CORE_PEER_FILESYSTEMPATH=/var/hyperledger/production
+      # (Private) Address at local network interface that this peer listens on (I.e the port the peer listens on for inbound connections)
+      - CORE_PEER_LISTENADDRESS=0.0.0.0:7051
+      # (Private) Address the peer uses to listen for inbound chaincode connections (I.e the port the peer listens on for inbound chaincode connections)
+      - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:7052
+      # Enable TLS on a peer node
+      # - CORE_PEER_TLS_ENABLED=true
+      - CORE_PEER_TLS_ENABLED=false
+      # Endpoint of the VM management system
+      - CORE_PEER_TLS_CERT_FILE=/var/hyperledger/tls/server.crt
+      - CORE_PEER_TLS_KEY_FILE=/var/hyperledger/tls/server.key
+      - CORE_PEER_TLS_ROOTCERT_FILE=/var/hyperledger/tls/ca.crt 
+      - CORE_VM_ENDPOINT=unix://host/var/run/docker.sock
+    volumes:
+      # Set our /fabric-network local folder to be located at /var/hyperledger/config folder in the container
+      - $PROJECT_ROOT_FOLDER:/var/hyperledger/config
+      # This mapping will allow communicate with the docker daemon from within a container
+      - /var/run:/host/var/run
+    # The directory where all RUN, CMD, ENTRYPOINT, COPY and ADD instructions are run from
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+    networks:
+      - bank-network
+
+
+  orderer-base:
+    image: hyperledger/fabric-orderer:$IMAGE_TAG
+    command: orderer
+    environment:
+      # The location of our orderer.yaml file is in the /fabric-network local folder, which is binded to /var/hyperledger/orderer/config container folder
+      - FABRIC_CFG_PATH=/var/hyperledger/orderer/config
+      - FABRIC_LOGGING_SPEC=INFO
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+      # Directory to store blocks in
+      - ORDERER_FILELEDGER_LOCATION=/var/hyperledger/production/orderer
+      # Local address orderer listens on
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      # Port that orderer listens on
+      - ORDERER_GENERAL_LISTENPORT=7050
+      # Method to obtain the genesis block
+      - ORDERER_GENERAL_BOOTSTRAPMETHOD=file
+      # Path to the genesis block
+      - ORDERER_GENERAL_BOOTSTRAPFILE=/var/hyperledger/orderer/genesis.block
+      - ORDERER_GENERAL_TLS_ENABLED=false
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt]
+      - ORDERER_DEBUG_BROADCASTTRACEDIR=/var/hyperledger/orderer/logs/broadcast
+      - ORDERER_DEBUG_DELIVERTRACEDIR=/var/hyperledger/orderer/logs/deliver
+    volumes:
+      # Set our /fabric-network local folder to be located at /var/hyperledger/config folder in the container
+      - $PROJECT_ROOT_FOLDER:/var/hyperledger/orderer/config
+      - $PROJECT_ROOT_FOLDER/channel-artifacts/genesis.block:/var/hyperledger/orderer/genesis.block
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    networks:
+      - bank-network
+
+
+
+  orderer-A:
+    container_name: ordererA
+    extends:
+      file: ./docker-compose-base.yaml
+      service: orderer-base
+    environment:
+      - ORDERER_GENERAL_LOCALMSPID=OrdererAMSP
+    volumes:
+      - ordererAFileSystem:/var/hyperledger/production/orderer
+      - ${CRYPTO_CONFIG_FOLDER}/ordererOrganizations/orderer_a.net/orderers/orderer.orderer_a.net/msp:/var/hyperledger/orderer/msp
+      - ${CRYPTO_CONFIG_FOLDER}/ordererOrganizations/orderer_a.net/orderers/orderer.orderer_a.net/tls:/var/hyperledger/orderer/tls
+      - ${PROJECT_ROOT_FOLDER}/production/logs/ordererA:/var/hyperledger/orderer/logs
+    ports:
+      - 7050:7050
+      
+
+  peer-A:
+    # Name of our container
+    container_name: peerA
+    # Extends the peer-base service configuration in the docker-compose-base.yaml file
+    extends:
+      file: ./docker-compose-base.yaml
+      service: peer-base
+    # Define all peer specific environment variables here
+    environment:
+      # A unique identifier for a peer instance
+      - CORE_PEER_ID=peerA
+      # Key which this organization's MSP definition is referenced by. This value is set in configtx.yaml under Organizations profile
+      - CORE_PEER_LOCALMSPID=BankAMSP
+      # (Public) Address that other peers use to connect to this peer
+      # This endpoint is defined in crypto-config.yaml
+      - CORE_PEER_ADDRESS=peer0.bank_a.trade.com:7051
+      # (Public) Address that other peers use to connect to the chaincode on this peer
+      - CORE_PEER_CHAINCODEADDRESS=peer0.bank_a.trade.com:7052
+    volumes: 
+      # Bind the named volume (pointing to local folder fabric-network/production/peer/peerA) to /var/hyperledger/production container path
+      - peerAFileSystem:/var/hyperledger/production
+      # Folder containing msp material
+      - ${CRYPTO_CONFIG_FOLDER}/peerOrganizations/bank_a.trade.com/peers/peer0.bank_a.trade.com/msp:/var/hyperledger/msp
+      # Folder containing tls material
+      - ${CRYPTO_CONFIG_FOLDER}/peerOrganizations/bank_a.trade.com/peers/peer0.bank_a.trade.com/tls:/var/hyperledger/tls
+      # Folder to store ledger snapshots
+      - ${PROJECT_ROOT_FOLDER}/production/snapshots/peerA:/var/hyperledger/snapshots
+    # Maps the host port to container port
+    ports:
+      - 7051:7051
+    # The specified services (orderer-A) will start before this service (peer-A) is started
+    depends_on:
+      - orderer-A

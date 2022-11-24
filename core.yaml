@@ -17,7 +17,7 @@ peer:
   # If specified peer address is invalid then it will fallback to the auto detected IP (local IP) regardless of the peer addressAutoDetect value.
   # chaincodeAddress: 0.0.0.0:7052
 
-  # When used as peer config, this represents the endpoint to other peers in the same organization. 
+  # When used as peer config, this represents the endpoint to other peers in the same organization, published via gossip
   # For peers in other organization, see gossip.externalEndpoint for more info.
   # When used as CLI config, this means the peer's endpoint to interact with
   address: 0.0.0.0:7051
@@ -76,11 +76,11 @@ peer:
 
     # Defines whenever peer will initialize dynamic algorithm for "leader" selection, 
     # where leader is the peer to establish connection with ordering service and use delivery protocol to pull ledger blocks from ordering service.
-    useLeaderElection: false
+    useLeaderElection: true
     # Statically defines peer to be an organization "leader", where this means that current peer will maintain connection
     # with ordering service and disseminate block across peers in its own organization. 
     # Multiple peers or all peers in an organization may be configured as org leaders, so that they all pull blocks directly from ordering service.
-    orgLeader: true
+    orgLeader: false
 
     # Interval for membershipTracker polling
     membershipTrackerInterval: 5s
@@ -268,7 +268,7 @@ peer:
   # location must be access control protected to prevent unintended
   # modification that might corrupt the peer operations.
   # The path may be relative to FABRIC_CFG_PATH or an absolute path.
-  fileSystemPath: /var/hyperledger/production/peer/peerA
+  fileSystemPath: /var/hyperledger/production
 
    # BCCSP (Blockchain crypto provider): Select which crypto implementation or
   # library to use
@@ -302,7 +302,7 @@ peer:
   
    # Path on the file system where peer will find MSP local configurations
   # The path may be relative to FABRIC_CFG_PATH or an absolute path.
-  mspConfigPath: ./crypto-config/peerOrganizations/bank_a.trade.com/users/Admin@bank_a.trade.com/msp
+  mspConfigPath: /var/hyperledger/msp
 
    # Identifier of the local MSP
   # ----!!!!IMPORTANT!!!-!!!IMPORTANT!!!-!!!IMPORTANT!!!!----
@@ -463,7 +463,7 @@ vm:
   # https://localhost:2376
   # If you utilize external chaincode builders and don't need the default Docker chaincode builder,
   # the endpoint should be unconfigured so that the peer's Docker health checker doesn't get registered.
-  endpoint: unix:///var/run/docker.sock
+  endpoint: unix://host/var/run/docker.sock
 
   # settings for docker vms
   docker:
@@ -536,7 +536,7 @@ chaincode:
 
   node:
     # This is an image based on node:$(NODE_VER)-alpine
-    runtime: $(DOCKER_NS)/fabric-nodeenv:$(TWO_DIGIT_VERSION)
+    runtime: $(DOCKER_NS)/fabric-nodeenv:2.4
 
   # List of directories to treat as external builders and launchers for chaincode. 
   # The external builder detection processing will iterate over the builders in the order specified below.
@@ -614,10 +614,10 @@ ledger:
       # Otherwise proper security must be provided on the connection between CouchDB client (on the peer) and server.
       couchDBAddress: 127.0.0.1:5984
       # This username must have read and write authority on CouchDB
-      username:
+      username: username
       # The password is recommended to pass as an environment variable during start up (eg CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD).
       # If it is stored here, the file must be access control protected to prevent unintended users from discovering the password.
-      password:
+      password: password
       # Number of retries for CouchDB errors
       maxRetries: 3
       # Number of retries for CouchDB errors during peer startup.
@@ -668,7 +668,7 @@ ledger:
   snapshots:
     # Path on the file system where peer will store ledger snapshots
     # The path must be an absolute path.
-    rootDir: /var/hyperledger/production/peer/peerA/snapshots
+    rootDir: /var/hyperledger/snapshots
 
 
 

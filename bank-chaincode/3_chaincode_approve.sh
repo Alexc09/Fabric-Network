@@ -1,6 +1,6 @@
 #! /bin/bash
 
-# This script approves the chaincode
+# This script approves the chaincode definition
 
 . chaincode_set_env.sh
 

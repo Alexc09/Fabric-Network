@@ -304,6 +304,7 @@ Orderer: &OrdererDefaults
   # The preferred way to specify orderer addresses is now to include the OrdererEndpoints item in your org definition
   Addresses: 
     # - localhost:7050
+    # ### NOTE IF YOU"RE USING LOCAL SERVER INSTEAD OF DOCKER TO CREATE FABRIC NETWORK
     # If you're using any ip that isn't localhost, you have to add the domain to the /etc/hosts file and resolve it to localhost
     # 127.0.0.1       orderer.orderer_a.net
     - orderer.orderer_a.net:7050

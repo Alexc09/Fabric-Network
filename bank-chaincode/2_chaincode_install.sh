@@ -6,6 +6,7 @@
 
 # Encountered an issue with chaincode installation, where fabric expects hyperledger/fabric-nodeenv:2.5 but only 2.4 is publicly available on docker hub
 # Solved by pulling v2.4, then re-tagging it to 2.5 (Uncomment the next 2 lines to resolve)
+# Alternatively, you can specify the image version to pull, via core.yaml chaincode profile
 # docker pull hyperledger/fabric-nodeenv:2.4
 # docker tag hyperledger/fabric-nodeenv:2.4 hyperledger/fabric-nodeenv:2.5
 

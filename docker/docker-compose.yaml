@@ -1,0 +1,52 @@
+version: "2"
+
+services:
+  orderer-A:
+    container_name: ordererA
+    extends:
+      file: ./docker-compose-base.yaml
+      service: orderer-base
+    environment:
+      - ORDERER_GENERAL_LOCALMSPID=OrdererAMSP
+    volumes:
+      - ordererAFileSystem:/var/hyperledger/production/orderer
+      - ${CRYPTO_CONFIG_FOLDER}/ordererOrganizations/orderer_a.net/orderers/orderer.orderer_a.net/msp:/var/hyperledger/orderer/msp
+      - ${CRYPTO_CONFIG_FOLDER}/ordererOrganizations/orderer_a.net/orderers/orderer.orderer_a.net/tls:/var/hyperledger/orderer/tls
+      - ${PROJECT_ROOT_FOLDER}/production/logs/ordererA:/var/hyperledger/orderer/logs
+    ports:
+      - 7050:7050
+      
+
+  peer-A:
+    # Name of our container
+    container_name: peerA
+    # Extends the peer-base service configuration in the docker-compose-base.yaml file
+    extends:
+      file: ./docker-compose-base.yaml
+      service: peer-base
+    # Define all peer specific environment variables here
+    environment:
+      # A unique identifier for a peer instance
+      - CORE_PEER_ID=peerA
+      # Key which this organization's MSP definition is referenced by. This value is set in configtx.yaml under Organizations profile
+      - CORE_PEER_LOCALMSPID=BankAMSP
+      # (Public) Address that other peers use to connect to this peer
+      # This endpoint is defined in crypto-config.yaml
+      - CORE_PEER_ADDRESS=peer0.bank_a.trade.com:7051
+      # (Public) Address that other peers use to connect to the chaincode on this peer
+      - CORE_PEER_CHAINCODEADDRESS=peer0.bank_a.trade.com:7052
+    volumes: 
+      # Bind the named volume (pointing to local folder fabric-network/production/peer/peerA) to /var/hyperledger/production container path
+      - peerAFileSystem:/var/hyperledger/production
+      # Folder containing msp material
+      - ${CRYPTO_CONFIG_FOLDER}/peerOrganizations/bank_a.trade.com/peers/peer0.bank_a.trade.com/msp:/var/hyperledger/msp
+      # Folder containing tls material
+      - ${CRYPTO_CONFIG_FOLDER}/peerOrganizations/bank_a.trade.com/peers/peer0.bank_a.trade.com/tls:/var/hyperledger/tls
+      # Folder to store ledger snapshots
+      - ${PROJECT_ROOT_FOLDER}/production/snapshots/peerA:/var/hyperledger/snapshots
+    # Maps the host port to container port
+    ports:
+      - 7051:7051
+    # The specified services (orderer-A) will start before this service (peer-A) is started
+    depends_on:
+      - orderer-A

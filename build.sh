@@ -4,12 +4,11 @@
 # Delete the existing configs
 rm -r crypto-config channel-artifacts-output channel-artifacts
 
+# Points to the folder with configtx.yaml (In this case, it's PWD because build.sh and configtx.yaml are in the same folder)
+export FABRIC_CFG_PATH=$PWD
 
 # Step 1: Generate cryptographic material
 cryptogen generate --config=./crypto-config.yaml --output=crypto-config
-
-# Points to the folder with configtx.yaml (In this case, it's PWD because build.sh and configtx.yaml are in the same folder)
-export FABRIC_CFG_PATH=$PWD
 
 # Step 2: Create the genesis block to bootstrap the ordering service and will serve as the first block of the orderer system channel
 # This block is maintained by the ordering service nodes to track the various application channels created within the network

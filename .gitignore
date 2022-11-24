@@ -1,6 +1,7 @@
 production/
 crypto-config/
 bank-chaincode/node_modules/
+bank-chaincode/*.tar.gz
 bank-chaincode/package-lock.json\
 channel-artifacts/
 channel-artifacts-output/

@@ -42,4 +42,4 @@ export CORE_LEDGER_STATE_STATEDATABASE=goleveldb
 export CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME=testuser
 export CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD=testpassword
 
-echo "Initialized environment as $1"
+echo "Initialized environment as $1 Admin"

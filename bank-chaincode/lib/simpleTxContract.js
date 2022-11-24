@@ -53,6 +53,10 @@ class simpleTxContract extends Contract {
     }
 
     async transfer(ctx, sender, receiver, amount) {
+        ...
+    }
+
+    async transfer(ctx, sender, receiver, amount) {
         amount = parseFloat(amount)
         if (amount <= 0) {
             throw new Error(`Invalid amount provided: ${amount}`) 

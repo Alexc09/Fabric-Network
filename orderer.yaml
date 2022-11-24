@@ -12,7 +12,7 @@
 ################################################################################
 General:
   # IP Address on which the orderer will accept incoming connections via GRPC
-  ListenAddress: 127.0.0.1
+  ListenAddress: 0.0.0.0
   # The port to bind to listen
   ListenPort: 7050
 

@@ -1,6 +1,8 @@
 #! /bin/bash
 
-# This script commits the chaincode
+# This script commits the chaincode definition
+
+. chaincode_set_env.sh
 
 
 # After sufficient number of organizations have approved the chaincode definition,
@@ -17,7 +19,7 @@ export ORDERER_ADDRESS=localhost:7050
 
 # Check which orgs have approved the chaincode definition so we know whether the chaincode definition can be committed
 peer lifecycle chaincode checkcommitreadiness --name $CC_NAME --version $CC_VERSION --sequence 1 \
---channelID $CHANNEL_ID -o $ORDERER_ADDRESS --init-required
+--channelID $CHANNEL_ID -o $ORDERER_ADDRESS
 # peer lifecycle chaincode checkcommitreadiness --name simpleTx --version 1.0 --sequence 1 \
 # --channelID one-bank-channel -o localhost:7050 --init-required
 
@@ -29,5 +31,5 @@ peer lifecycle chaincode commit --name $CC_NAME --version $CC_VERSION --sequence
 
 
 # Check whether the chaincode definition is committed on the channel
-peer lifecycle chaincode querycommitted --name $CC_NAME --version $CC_VERSION --channelID $CHANNEL_ID
+peer lifecycle chaincode querycommitted --channelID $CHANNEL_ID
 # peer lifecycle chaincode querycommitted --name simpleTx --version 1.0 --channelID one-bank-channel

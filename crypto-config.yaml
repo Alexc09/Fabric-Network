@@ -28,6 +28,10 @@ OrdererOrgs:
 PeerOrgs:
   - Name: BankA
     Domain: bank_a.trade.com
+    Specs:
+      # resolves to peer0.bank_a.trade.com
+      - Hostname: peer0
+      - Hostname: peer1
     # Enable node organizational units, which break down our organizations into further departments
     EnableNodeOUs: true
     Template:
@@ -40,6 +44,9 @@ PeerOrgs:
 
   - Name: BankB
     Domain: bank_b.trade.com
+    Specs:
+      - Hostname: peer0
+      - Hostname: peer1
     EnableNodeOUs: true
     Template:
       Count: 2
@@ -48,6 +55,9 @@ PeerOrgs:
   
   - Name: BankC
     Domain: bank_c.trade.com
+    Specs:
+      - Hostname: peer0
+      - Hostname: peer1
     EnableNodeOUs: true
     Template:
       Count: 2
