@@ -44,6 +44,7 @@ services:
       # The location of our core.yaml file is in the /fabric-network local folder, which is binded to /var/hyperledger/config container folder
       - FABRIC_CFG_PATH=/var/hyperledger/config
       # Set the overlay network used by our containers. So the chaincode container can communicate with the peer containers
+      # Docker network names follow the format: <COMPOSE_PROJECT_NAME>_<NETWORK_NAME>
       - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=${COMPOSE_PROJECT_NAME}_bank-network
       - FABRIC_LOGGING_SPEC=INFO
       # Path to the MSP folder
