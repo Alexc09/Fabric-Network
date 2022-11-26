@@ -7,11 +7,11 @@ services:
     command: orderer
     environment:
       # The location of our orderer.yaml file is in the /fabric-network local folder, which is binded to /var/hyperledger/orderer/config container folder
-      - FABRIC_CFG_PATH=/var/hyperledger/orderer/config
+      - FABRIC_CFG_PATH=/var/hyperledger/config
       - FABRIC_LOGGING_SPEC=INFO
-      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/msp
       # Directory to store blocks in
-      - ORDERER_FILELEDGER_LOCATION=/var/hyperledger/production/orderer
+      - ORDERER_FILELEDGER_LOCATION=/var/hyperledger/production
       # Local address orderer listens on
       - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
       # Port that orderer listens on
@@ -19,18 +19,16 @@ services:
       # Method to obtain the genesis block
       - ORDERER_GENERAL_BOOTSTRAPMETHOD=file
       # Path to the genesis block
-      - ORDERER_GENERAL_BOOTSTRAPFILE=/var/hyperledger/orderer/genesis.block
+      - ORDERER_GENERAL_BOOTSTRAPFILE=/var/hyperledger/config/channel-artifacts/genesis.block
       - ORDERER_GENERAL_TLS_ENABLED=false
-      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
-      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
-      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt]
-      - ORDERER_DEBUG_BROADCASTTRACEDIR=/var/hyperledger/orderer/logs/broadcast
-      - ORDERER_DEBUG_DELIVERTRACEDIR=/var/hyperledger/orderer/logs/deliver
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/tls/ca.crt]
+      - ORDERER_DEBUG_BROADCASTTRACEDIR=/var/hyperledger/logs/broadcast
+      - ORDERER_DEBUG_DELIVERTRACEDIR=/var/hyperledger/logs/deliver
     volumes:
       # Set our /fabric-network local folder to be located at /var/hyperledger/config folder in the container
-      - ${PROJECT_ROOT_FOLDER}:/var/hyperledger/orderer/config
-      # Provide the relative path to the genesis.block file
-      - ${PROJECT_ROOT_FOLDER}/channel-artifacts/genesis.block:/var/hyperledger/orderer/genesis.block
+      - ${PROJECT_ROOT_FOLDER}:/var/hyperledger/config
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric
     networks:
       - bank-network

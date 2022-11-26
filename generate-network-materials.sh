@@ -4,7 +4,7 @@
 # #### READ THIS IF ENCOUNTER ERROR TRYING TO GENERATE CRYPTO MATERIAL ####
 # If you get the below error:
 # Error generating signCA for org bank_a.trade.com
-# Then 
+# This error appears because there a bugged crypto-config folder.....Delete this project & re-clone it from github
 
 # Delete the existing configs
 rm -r crypto-config channel-artifacts-output channel-artifacts

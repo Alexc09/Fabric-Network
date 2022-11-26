@@ -17,6 +17,7 @@ volumes:
     driver_opts:
       type: "none"
       o: "bind"
+      # When we map a directory (via volumes), the host folder must either be an absolute path or a relative path beginning with ./ or ../
       # The folder on our host device
       device: "${PROJECT_ROOT_FOLDER}/production/peer/peerA"
 
@@ -58,10 +59,11 @@ services:
     environment:
       - ORDERER_GENERAL_LOCALMSPID=OrdererAMSP
     volumes:
-      - ordererAFileSystem:/var/hyperledger/production/orderer
-      - ${CRYPTO_CONFIG_FOLDER}/ordererOrganizations/orderer_a.net/orderers/orderer.orderer_a.net/msp:/var/hyperledger/orderer/msp
-      - ${CRYPTO_CONFIG_FOLDER}/ordererOrganizations/orderer_a.net/orderers/orderer.orderer_a.net/tls:/var/hyperledger/orderer/tls
-      - ${PROJECT_ROOT_FOLDER}/production/logs/ordererA:/var/hyperledger/orderer/logs
+      # - ordererAFileSystem:/var/hyperledger/production
+      - ${PROJECT_ROOT_FOLDER}/production/orderer/ordererA:/var/hyperledger/production
+      - ${PROJECT_ROOT_FOLDER}/crypto-config/ordererOrganizations/orderer_a.net/orderers/orderer.orderer_a.net/msp:/var/hyperledger/msp
+      - ${PROJECT_ROOT_FOLDER}/crypto-config/ordererOrganizations/orderer_a.net/orderers/orderer.orderer_a.net/tls:/var/hyperledger/tls
+      - ${PROJECT_ROOT_FOLDER}/production/logs/ordererA:/var/hyperledger/logs
     ports:
       - 7050:7050
       
@@ -86,11 +88,12 @@ services:
       - CORE_PEER_CHAINCODEADDRESS=peer0.bank_a.trade.com:7052
     volumes: 
       # Bind the named volume (pointing to local folder fabric-network/production/peer/peerA) to /var/hyperledger/production container path
-      - peerAFileSystem:/var/hyperledger/production
+      # - peerAFileSystem:/var/hyperledger/production
+      - ${PROJECT_ROOT_FOLDER}/production/peer/peerA:/var/hyperledger/production
       # Folder containing msp material
-      - ${CRYPTO_CONFIG_FOLDER}/peerOrganizations/bank_a.trade.com/peers/peer0.bank_a.trade.com/msp:/var/hyperledger/msp
+      - ${PROJECT_ROOT_FOLDER}/crypto-config/peerOrganizations/bank_a.trade.com/peers/peer0.bank_a.trade.com/msp:/var/hyperledger/msp
       # Folder containing tls material
-      - ${CRYPTO_CONFIG_FOLDER}/peerOrganizations/bank_a.trade.com/peers/peer0.bank_a.trade.com/tls:/var/hyperledger/tls
+      - ${PROJECT_ROOT_FOLDER}/crypto-config/peerOrganizations/bank_a.trade.com/peers/peer0.bank_a.trade.com/tls:/var/hyperledger/tls
       # Folder to store ledger snapshots
       - ${PROJECT_ROOT_FOLDER}/production/snapshots/peerA:/var/hyperledger/snapshots
     # Maps the host port to container port
@@ -110,6 +113,8 @@ services:
     environment:
       - FABRIC_CFG_PATH=/var/hyperledger
       - FABRIC_LOGGING_SPEC=INFO
+      - TEST=$PROJECT_ROOT_FOLDER
+      - TEST2=${PROJECT_ROOT_FOLDER}
     volumes:
       # Map our project directory to /var/hyperledger
       - ${PROJECT_ROOT_FOLDER}:/var/hyperledger
