@@ -5,3 +5,8 @@ bank-chaincode/*.tar.gz
 bank-chaincode/package-lock.json\
 channel-artifacts/
 channel-artifacts-output/
+
+# ca/ca-client/
+# ca/ca-server/
+# !ca/ca-client/fabric-ca-client-config.yaml
+# !ca/ca-server/fabric-ca-server-config.yaml
