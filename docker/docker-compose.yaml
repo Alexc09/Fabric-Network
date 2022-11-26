@@ -103,7 +103,8 @@ services:
     depends_on:
       - orderer-A
 
-  # Tools container used for managing peers. We use this container to run commands (E.g peer lifecycle chaincode queryinstalleds)
+  # Tools container used for initial network setup (generate crypto material) and managing peers
+  # We use this container to run our commands (E.g peer lifecycle chaincode queryinstalleds)
   tools:
     image: hyperledger/fabric-tools:$IMAGE_TAG
     container_name: tools
@@ -113,17 +114,12 @@ services:
     environment:
       - FABRIC_CFG_PATH=/var/hyperledger
       - FABRIC_LOGGING_SPEC=INFO
-      - TEST=$PROJECT_ROOT_FOLDER
-      - TEST2=${PROJECT_ROOT_FOLDER}
     volumes:
       # Map our project directory to /var/hyperledger
       - ${PROJECT_ROOT_FOLDER}:/var/hyperledger
       # VM docker stream folder mapping
       - /var/run/:/host/var/run/
     # This is the working directory on login
-    working_dir: /opt/scripts
+    working_dir: /var/hyperledger
     networks:
       - bank-network
-
-  
-

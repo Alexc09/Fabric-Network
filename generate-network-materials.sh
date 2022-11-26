@@ -9,6 +9,9 @@
 # Delete the existing configs
 rm -r crypto-config channel-artifacts-output channel-artifacts
 
+# Delete the existing blockchain network files
+rm -r production
+
 # Points to the folder with configtx.yaml (In this case, it's PWD because this file and configtx.yaml are in the same folder)
 export FABRIC_CFG_PATH=$PWD
 

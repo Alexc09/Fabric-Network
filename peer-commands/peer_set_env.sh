@@ -13,24 +13,13 @@ if [ $# -eq 0 ]; then
 fi
 
 if [ "$1" == "PeerA" ]; then
-    # path where peer stores data (the ledger)
-    export CORE_PEER_FILESYSTEMPATH=$PWD/production/peer/peerA
     # Path of the MSP local configuration of the organization admin
-    export CORE_PEER_MSPCONFIGPATH=$PWD/crypto-config/peerOrganizations/bank_a.trade.com/users/Admin@bank_a.trade.com/msp
-    # Set identity as user
-    # export CORE_PEER_MSPCONFIGPATH=$PWD/crypto-config/peerOrganizations/bank_a.trade.com/users/User1@bank_a.trade.com/msp
-    # Set identity as peer
-    # export CORE_PEER_MSPCONFIGPATH=$PWD/crypto-config/peerOrganizations/bank_a.trade.com/peers/peer0.bank_a.trade.com/msp
-    # Path where peer stores ledger snapshots
-    export CORE_LEDGER_SNAPSHOTS_ROOTDIR=$PWD/production/peer/peerA/snapshots
+    export CORE_PEER_MSPCONFIGPATH=$PWD/../crypto-config/peerOrganizations/bank_a.trade.com/users/Admin@bank_a.trade.com/msp
 elif [ "$1" == "PeerB" ]; then
-    export CORE_PEER_FILESYSTEMPATH=$PWD/production/peer/peerB
-    export CORE_PEER_MSPCONFIGPATH=$PWD/crypto-config/peerOrganizations/bank_b.trade.com/users/Admin@bank_b.trade.com/msp
-    export CORE_LEDGER_SNAPSHOTS_ROOTDIR=$PWD/production/peer/peerB/snapshots
+    export CORE_PEER_MSPCONFIGPATH=$PWD/../crypto-config/peerOrganizations/bank_b.trade.com/users/Admin@bank_b.trade.com/msp
 elif [ "$1" == "PeerC" ]; then
-    export CORE_PEER_FILESYSTEMPATH=$PWD/production/peer/peerC
-    export CORE_PEER_MSPCONFIGPATH=$PWD/crypto-config/peerOrganizations/bank_c.trade.com/users/Admin@bank_c.trade.com/msp
-    export CORE_LEDGER_SNAPSHOTS_ROOTDIR=$PWD/production/peer/peerC/snapshots
+    # export CORE_PEER_FILESYSTEMPATH=$PWD/../production/peer/peerC
+    export CORE_PEER_MSPCONFIGPATH=$PWD/../crypto-config/peerOrganizations/bank_c.trade.com/users/Admin@bank_c.trade.com/msp
 fi;
 
 # Points to the folder with core.yaml. The peer binary uses this env var
