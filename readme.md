@@ -1,3 +1,5 @@
+Note: This is for local network setup. Docker network setup is in the main branch
+
 Basic Steps
 1. Edit the crypto-config.yaml file to configure the crypto materials to be generated
 2. Edit the configtx.yaml file to configure the channel configs (E.g Channel participants, etc..) 
