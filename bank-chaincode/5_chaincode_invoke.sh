@@ -19,7 +19,8 @@ export CHANNEL_ID="one-bank-channel"
 # Invoke is used to invoke the chaincode. It will try to commit the endorsed trnasaction to the network. Used for ctx.stub.putState
 
 export CHANNEL_ID="one-bank-channel"
-export ORDERER_ADDRESS=localhost:7050
+export ORDERER_ADDRESS=orderer.orderer_a.net:7050
+export PEER_ADDRESS=peer0.bank_a.trade.com:7051
 
 # Query the chaincode
 peer chaincode query -c '{"function":"getAllBalances","Args":[]}' --name $CC_NAME --channelID $CHANNEL_ID -o $ORDERER_ADDRESS

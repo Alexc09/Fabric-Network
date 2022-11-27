@@ -15,11 +15,15 @@ fi
 if [ "$1" == "PeerA" ]; then
     # Path of the MSP local configuration of the organization admin
     export CORE_PEER_MSPCONFIGPATH=$PWD/../crypto-config/peerOrganizations/bank_a.trade.com/users/Admin@bank_a.trade.com/msp
+    # Indicate which peer you are execute your commands on
+    export CORE_PEER_ADDRESS=peer0.bank_a.trade.com:7051
 elif [ "$1" == "PeerB" ]; then
     export CORE_PEER_MSPCONFIGPATH=$PWD/../crypto-config/peerOrganizations/bank_b.trade.com/users/Admin@bank_b.trade.com/msp
+    export CORE_PEER_ADDRESS=peer0.bank_b.trade.com:7051
 elif [ "$1" == "PeerC" ]; then
     # export CORE_PEER_FILESYSTEMPATH=$PWD/../production/peer/peerC
     export CORE_PEER_MSPCONFIGPATH=$PWD/../crypto-config/peerOrganizations/bank_c.trade.com/users/Admin@bank_c.trade.com/msp
+    export CORE_PEER_ADDRESS=peer0.bank_c.trade.com:7051
 else
     echo "Unknown argument $1 passed!"
 fi;

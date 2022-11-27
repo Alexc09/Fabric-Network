@@ -53,6 +53,7 @@ services:
       - CORE_PEER_LISTENADDRESS=0.0.0.0:7051
       # (Private) Address the peer uses to listen for inbound chaincode connections (I.e the port the peer listens on for inbound chaincode connections)
       - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:7052
+      # - CORE_PEER_GOSSIP_BOOTSTRAP=0.0.0.0:7051
       # Enable TLS on a peer node
       # - CORE_PEER_TLS_ENABLED=true
       - CORE_PEER_TLS_ENABLED=false

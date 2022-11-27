@@ -13,7 +13,7 @@ networks:
 # Volumes to persist our container data
 volumes:
   # The localFileSystem for PeerA
-  peerAFileSystem:
+  orgAPeerFileSystem:
     driver: local
     driver_opts:
       type: "none"
@@ -22,14 +22,14 @@ volumes:
       # The folder on our host device
       device: "${PROJECT_ROOT_FOLDER}/production/peer/peerA"
 
-  peerBFileSystem:
+  orgBPeerFileSystem:
     driver: local
     driver_opts:
       type: "none"
       o: "bind"
       device: "${PROJECT_ROOT_FOLDER}/production/peer/peerB"
 
-  peerCFileSystem:
+  orgCPeerFileSystem:
     driver: local
     driver_opts:
       type: "none"
@@ -52,8 +52,8 @@ volumes:
 
       
 services:
-  orderer-A:
-    container_name: ordererA
+  orderer.orderer_a.net:
+    container_name: orderer.orderer_a.net
     extends:
       file: ./docker-compose-base.yaml
       service: orderer-base
@@ -69,9 +69,9 @@ services:
       - 7050:7050
       
 
-  peer-A:
+  peer0.bank_a.trade.com:
     # Name of our container
-    container_name: peerA
+    container_name: peer0.bank_a.trade.com
     # Extends the peer-base service configuration in the docker-compose-base.yaml file
     extends:
       file: ./docker-compose-base.yaml
@@ -83,11 +83,10 @@ services:
       # Key which this organization's MSP definition is referenced by. This value is set in configtx.yaml under Organizations profile
       - CORE_PEER_LOCALMSPID=BankAMSP
       # (Public) Address that other peers use to connect to this peer
-      # This endpoint is defined in crypto-config.yaml
-      # - CORE_PEER_ADDRESS=peer0.bank_a.trade.com:7051
-      - CORE_PEER_ADDRESS=peerA:7051
+      # This endpoint is the name of our peer container (We are using bridge network and container can resolve each other via container names)
+      - CORE_PEER_ADDRESS=peer0.bank_a.trade.com:7051
       # (Public) Address that other peers use to connect to the chaincode on this peer
-      - CORE_PEER_CHAINCODEADDRESS=peerA:7052
+      - CORE_PEER_CHAINCODEADDRESS=peer0.bank_a.trade.com:7052
     volumes: 
       # Bind the named volume (pointing to local folder fabric-network/production/peer/peerA) to /var/hyperledger/production container path
       # - peerAFileSystem:/var/hyperledger/production
@@ -103,7 +102,7 @@ services:
       - 7051:7051
     # The specified services (orderer-A) will start before this service (peer-A) is started
     depends_on:
-      - orderer-A
+      - orderer.orderer_a.net
 
   # Tools container used for initial network setup (generate crypto material) and managing peers
   # We use this container to run our commands (E.g peer lifecycle chaincode queryinstalleds)

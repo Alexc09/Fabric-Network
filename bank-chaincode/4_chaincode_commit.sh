@@ -15,7 +15,8 @@
 # The chaincode can only be invoked/queried if the commit transaction is successful
 
 export CHANNEL_ID="one-bank-channel"
-export ORDERER_ADDRESS=localhost:7050
+export ORDERER_ADDRESS=orderer.orderer_a.net:7050
+export PEER_ADDRESS=peer0.bank_a.trade.com:7051
 
 # Check which orgs have approved the chaincode definition so we know whether the chaincode definition can be committed
 peer lifecycle chaincode checkcommitreadiness --name $CC_NAME --version $CC_VERSION --sequence 1 \

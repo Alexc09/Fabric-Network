@@ -24,13 +24,13 @@
 
 # Obtain the packageID using the queryinstalled command
 echo "Running queryInstalled command to obtain packageID"
-peer lifecycle chaincode queryinstalled --peerAddresses peerA:7051
+peer lifecycle chaincode queryinstalled --peerAddresses peer0.bank_a.trade.com:7051
 echo "Enter packageID:"
 read CC_PACKAGE_ID
 
 export CHANNEL_ID="one-bank-channel"
-export ORDERER_ADDRESS=ordererA:7050
-export PEER_ADDRESS=peerA:7051
+export ORDERER_ADDRESS=orderer.orderer_a.net:7050
+export PEER_ADDRESS=peer0.bank_a.trade.com:7051
 export ORDERER_CA=crypto-config/ordererOrganizations/orderer_a.net/orderers/orderer.orderer_a.net/msp/tlscacerts/tlsca.orderer_a.net-cert.pem
 
 
