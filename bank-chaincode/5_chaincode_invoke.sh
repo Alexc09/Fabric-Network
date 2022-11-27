@@ -18,14 +18,17 @@ export CHANNEL_ID="one-bank-channel"
 # Query is used to get the endorsed result of a chaincode function call. It does not generate transactions. Used for ctx.stub.geState
 # Invoke is used to invoke the chaincode. It will try to commit the endorsed trnasaction to the network. Used for ctx.stub.putState
 
-export CHANNEL_ID="one-bank-channel"
-export ORDERER_ADDRESS=orderer.orderer_a.net:7050
-export PEER_ADDRESS=peer0.bank_a.trade.com:7051
+CHANNEL_ID="one-bank-channel"
+
+# peer chaincode instantiate --name $CC_NAME --version $CC_VERSION --channelID $CHANNEL_ID -c '{"function":"init","Args":[]}'
+# peer chaincode invoke -c '{"function":"init","Args":[]}' --name $CC_NAME --channelID $CHANNEL_ID 
+
+# Initialize the chaincode using --isInit flag (This is needed if --init-required was used in approve and commit)
+peer chaincode invoke --name $CC_NAME --channelID $CHANNEL_ID --isInit -c '{"function":"init","Args":[]}'
 
 # Query the chaincode
-peer chaincode query -c '{"function":"getAllBalances","Args":[]}' --name $CC_NAME --channelID $CHANNEL_ID -o $ORDERER_ADDRESS
-peer chaincode query -c '{"function":"getAllBalances","Args":[]}' --name simpleTx --channelID one-bank-channel 
+peer chaincode query -c '{"function":"getAllBalances","Args":[]}' --name $CC_NAME --channelID $CHANNEL_ID 
+peer chaincode query -c '{"function":"getBalance","Args":["BankA"]}' --name $CC_NAME --channelID $CHANNEL_ID 
 
 # Invokes the chaincode
-peer chaincode invoke -c '{"function":"transfer","Args":["BankB","BankA",50]}' --name $CC_NAME --channelID $CHANNEL_ID 
-peer chaincode invoke -c '{"function":"transfer","Args":["BankB","BankA",50]}' --name simpleTx --channelID one-bank-channel 
+peer chaincode invoke -c '{"function":"transfer","Args":["BankB","BankA","50"]}' --name $CC_NAME --channelID $CHANNEL_ID 

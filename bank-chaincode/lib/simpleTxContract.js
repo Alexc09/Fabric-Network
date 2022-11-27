@@ -9,7 +9,7 @@ class simpleTxContract extends Contract {
     }
 
     async beforeTransaction(ctx) {
-        this.TxId = ctx.stub.getTxId()
+        this.TxId = ctx.stub.getTxID()
         console.log(`Logging for ${this.TxId}`)
     }
 
@@ -35,26 +35,19 @@ class simpleTxContract extends Contract {
                 PreviousTx: "0x00"
             },
         ]
-        for (const asset of assets) {
-            asset = {
-                Name: "BankA",
-                Balance: 100,
-            }
+        for (let asset of assets) {
             await ctx.stub.putState(asset.Name, Buffer.from(JSON.stringify(asset)))
         }
     }
 
     async getBalance(ctx, name) {
-        const bal = await ctx.stub.getState(name)
-        if (!bal || asset.length == 0) {
+        const asset = await ctx.stub.getState(name)
+        if (!asset || asset.length == 0) {
             throw new Error(`Balance for ${name} does not exist`)
         }
         return asset.toString()
     }
-
-    async transfer(ctx, sender, receiver, amount) {
-        ...
-    }
+    
 
     async transfer(ctx, sender, receiver, amount) {
         amount = parseFloat(amount)

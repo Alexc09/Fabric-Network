@@ -42,7 +42,7 @@ export ORDERER_CA=crypto-config/ordererOrganizations/orderer_a.net/orderers/orde
 # --channelID: The ID of the channel we're approving the chaincode on
 # -o: The orderer endpoint
 # --init-required: Specifies whether the chaincode needs to invoke init 
-peer lifecycle chaincode approveformyorg --package-id $CC_PACKAGE_ID --name $CC_NAME --version $CC_VERSION --sequence 1 --channelID $CHANNEL_ID -o $ORDERER_ADDRESS --peerAddresses $PEER_ADDRESS
+peer lifecycle chaincode approveformyorg --package-id $CC_PACKAGE_ID --name $CC_NAME --version $CC_VERSION --sequence $SEQUENCE --channelID $CHANNEL_ID -o $ORDERER_ADDRESS --peerAddresses $PEER_ADDRESS
 # --tls --cafile $ORDERER_CA
 
 # peer lifecycle chaincode approveformyorg --package-id simpleTx_1.0:e676806cabce61eb02b2547fe6753ddb7a5aadc4511e3e975419db485195235d \

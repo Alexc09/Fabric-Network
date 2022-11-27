@@ -19,13 +19,13 @@ export ORDERER_ADDRESS=orderer.orderer_a.net:7050
 export PEER_ADDRESS=peer0.bank_a.trade.com:7051
 
 # Check which orgs have approved the chaincode definition so we know whether the chaincode definition can be committed
-peer lifecycle chaincode checkcommitreadiness --name $CC_NAME --version $CC_VERSION --sequence 1 \
+peer lifecycle chaincode checkcommitreadiness --name $CC_NAME --version $CC_VERSION --sequence $SEQUENCE \
 --channelID $CHANNEL_ID -o $ORDERER_ADDRESS
 # peer lifecycle chaincode checkcommitreadiness --name simpleTx --version 1.0 --sequence 1 \
 # --channelID one-bank-channel -o localhost:7050 --init-required
 
 # Commit the chaincode definition on the channel
-peer lifecycle chaincode commit --name $CC_NAME --version $CC_VERSION --sequence 1 \
+peer lifecycle chaincode commit --name $CC_NAME --version $CC_VERSION --sequence $SEQUENCE \
 --channelID $CHANNEL_ID -o $ORDERER_ADDRESS
 # peer lifecycle chaincode commit --name simpleTx --version 1.0 --sequence 1 \
 # --channelID one-bank-channel -o localhost:7050 --init-required
