@@ -8,6 +8,7 @@ version: "2"
 # For instance, our orderer runs on container port 5000. If our peer wants to connect to the orderer container, it uses port 5000
 networks:
   bank-network:
+    driver: bridge
 
 # Volumes to persist our container data
 volumes:
@@ -83,9 +84,10 @@ services:
       - CORE_PEER_LOCALMSPID=BankAMSP
       # (Public) Address that other peers use to connect to this peer
       # This endpoint is defined in crypto-config.yaml
-      - CORE_PEER_ADDRESS=peer0.bank_a.trade.com:7051
+      # - CORE_PEER_ADDRESS=peer0.bank_a.trade.com:7051
+      - CORE_PEER_ADDRESS=peerA:7051
       # (Public) Address that other peers use to connect to the chaincode on this peer
-      - CORE_PEER_CHAINCODEADDRESS=peer0.bank_a.trade.com:7052
+      - CORE_PEER_CHAINCODEADDRESS=peerA:7052
     volumes: 
       # Bind the named volume (pointing to local folder fabric-network/production/peer/peerA) to /var/hyperledger/production container path
       # - peerAFileSystem:/var/hyperledger/production
@@ -106,7 +108,7 @@ services:
   # Tools container used for initial network setup (generate crypto material) and managing peers
   # We use this container to run our commands (E.g peer lifecycle chaincode queryinstalleds)
   tools:
-    image: hyperledger/fabric-tools:$IMAGE_TAG
+    image: hyperledger/fabric-tools:${IMAGE_TAG}
     container_name: tools
     command: /bin/bash
     tty: true
@@ -118,7 +120,7 @@ services:
       # Map our project directory to /var/hyperledger
       - ${PROJECT_ROOT_FOLDER}:/var/hyperledger
       # VM docker stream folder mapping
-      - /var/run/:/host/var/run/
+      - /var/run:/var/run
     # This is the working directory on login
     working_dir: /var/hyperledger
     networks:

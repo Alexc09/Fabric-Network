@@ -4,7 +4,9 @@
 # #### READ THIS IF ENCOUNTER ERROR TRYING TO GENERATE CRYPTO MATERIAL ####
 # If you get the below error:
 # Error generating signCA for org bank_a.trade.com
-# This error appears because there a bugged crypto-config folder.....Delete this project & re-clone it from github
+# Restart WSL. This bug seems to appear due to windows filesystem & wsl filesystem being out of sync, when you delete a folder using windows and try to create it via wsl
+# To avoid this issue, delete the folder using wsl rm -r command, instead of manually deleting it in windows explorer
+# If the issue still persists, delete this project & re-clone it from github
 
 # Delete the existing configs
 rm -r crypto-config channel-artifacts-output channel-artifacts

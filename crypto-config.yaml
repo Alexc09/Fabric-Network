@@ -16,6 +16,7 @@ OrdererOrgs:
     EnableNodeOUs: true
     Specs:
       - Hostname: orderer
+      
   - Name: OrdererB
     Domain: orderer_b.net
     EnableNodeOUs: true

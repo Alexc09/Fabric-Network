@@ -24,12 +24,13 @@
 
 # Obtain the packageID using the queryinstalled command
 echo "Running queryInstalled command to obtain packageID"
-peer lifecycle chaincode queryinstalled
+peer lifecycle chaincode queryinstalled --peerAddresses peerA:7051
 echo "Enter packageID:"
 read CC_PACKAGE_ID
 
 export CHANNEL_ID="one-bank-channel"
-export ORDERER_ADDRESS=localhost:7050
+export ORDERER_ADDRESS=ordererA:7050
+export PEER_ADDRESS=peerA:7051
 export ORDERER_CA=crypto-config/ordererOrganizations/orderer_a.net/orderers/orderer.orderer_a.net/msp/tlscacerts/tlsca.orderer_a.net-cert.pem
 
 
@@ -41,7 +42,7 @@ export ORDERER_CA=crypto-config/ordererOrganizations/orderer_a.net/orderers/orde
 # --channelID: The ID of the channel we're approving the chaincode on
 # -o: The orderer endpoint
 # --init-required: Specifies whether the chaincode needs to invoke init 
-peer lifecycle chaincode approveformyorg --package-id $CC_PACKAGE_ID --name $CC_NAME --version $CC_VERSION --sequence 1 --channelID $CHANNEL_ID -o $ORDERER_ADDRESS
+peer lifecycle chaincode approveformyorg --package-id $CC_PACKAGE_ID --name $CC_NAME --version $CC_VERSION --sequence 1 --channelID $CHANNEL_ID -o $ORDERER_ADDRESS --peerAddresses $PEER_ADDRESS
 # --tls --cafile $ORDERER_CA
 
 # peer lifecycle chaincode approveformyorg --package-id simpleTx_1.0:e676806cabce61eb02b2547fe6753ddb7a5aadc4511e3e975419db485195235d \

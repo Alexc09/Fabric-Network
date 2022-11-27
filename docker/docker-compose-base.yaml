@@ -3,7 +3,7 @@ version: "2"
 
 services:
   orderer-base:
-    image: hyperledger/fabric-orderer:$IMAGE_TAG
+    image: hyperledger/fabric-orderer:latest
     command: orderer
     environment:
       # The location of our orderer.yaml file is in the /fabric-network local folder, which is binded to /var/hyperledger/orderer/config container folder
@@ -65,7 +65,8 @@ services:
       # Set our /fabric-network local folder to be located at /var/hyperledger/config folder in the container
       - ${PROJECT_ROOT_FOLDER}:/var/hyperledger/config
       # This mapping will allow communicate with the docker daemon from within a container
-      - /var/run:/host/var/run
+      - /var/run:/var/run
+      # - /var/run:/host/var/run
     # The directory where all RUN, CMD, ENTRYPOINT, COPY and ADD instructions are run from
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
     networks:

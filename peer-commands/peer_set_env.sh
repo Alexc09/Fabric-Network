@@ -20,6 +20,8 @@ elif [ "$1" == "PeerB" ]; then
 elif [ "$1" == "PeerC" ]; then
     # export CORE_PEER_FILESYSTEMPATH=$PWD/../production/peer/peerC
     export CORE_PEER_MSPCONFIGPATH=$PWD/../crypto-config/peerOrganizations/bank_c.trade.com/users/Admin@bank_c.trade.com/msp
+else
+    echo "Unknown argument $1 passed!"
 fi;
 
 # Points to the folder with core.yaml. The peer binary uses this env var
